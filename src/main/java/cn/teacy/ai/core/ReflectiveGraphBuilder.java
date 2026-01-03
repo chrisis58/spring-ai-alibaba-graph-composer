@@ -1,10 +1,8 @@
 package cn.teacy.ai.core;
 
-import cn.teacy.ai.annotation.ConditionalEdge;
-import cn.teacy.ai.annotation.GraphComposer;
-import cn.teacy.ai.annotation.GraphKey;
-import cn.teacy.ai.annotation.GraphNode;
+import cn.teacy.ai.annotation.*;
 import cn.teacy.ai.exception.GraphDefinitionException;
+import cn.teacy.ai.interfaces.GraphBuildLifecycle;
 import com.alibaba.cloud.ai.graph.*;
 import com.alibaba.cloud.ai.graph.action.*;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
@@ -20,7 +18,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 public class ReflectiveGraphBuilder implements IGraphBuilder {
@@ -59,7 +59,13 @@ public class ReflectiveGraphBuilder implements IGraphBuilder {
 
             scanConditionalEdges(graphComposer, builder, graphId);
 
-            return builder.compile();
+            if (graphComposer instanceof GraphBuildLifecycle lifecycle) {
+                lifecycle.beforeCompile(builder);
+            }
+
+            CompileConfig compileConfig = scanCompileConfig(graphComposer);
+
+            return builder.compile(compileConfig);
 
         } catch (GraphStateException e) {
             throw new GraphDefinitionException(
@@ -155,6 +161,7 @@ public class ReflectiveGraphBuilder implements IGraphBuilder {
             if (method.isAnnotationPresent(ConditionalEdge.class)) {
                 ReflectionUtils.makeAccessible(method);
                 ConditionalEdge anno = method.getAnnotation(ConditionalEdge.class);
+                assert anno != null;
 
                 String sourceNodeId = anno.source();
                 Map<String, String> routeMap = parseMappings(anno.mappings(), method.getName());
@@ -182,6 +189,35 @@ public class ReflectiveGraphBuilder implements IGraphBuilder {
                 }
             }
         });
+    }
+
+    private CompileConfig scanCompileConfig(Object composer) {
+
+        AtomicReference<CompileConfig> configRef = new AtomicReference<>();
+
+        ReflectionUtils.doWithMethods(composer.getClass(), method -> {
+            if (method.isAnnotationPresent(GraphCompileConfig.class)) {
+                if (configRef.get() != null) {
+                    throw new IllegalStateException("Multiple @GraphConfig methods found in " + composer.getClass().getSimpleName());
+                }
+
+                ReflectionUtils.makeAccessible(method);
+
+                if (!CompileConfig.class.isAssignableFrom(method.getReturnType())) {
+                    throw new IllegalStateException("@GraphConfig method must return CompileConfig");
+                }
+
+                try {
+                    CompileConfig config = (CompileConfig) method.invoke(composer);
+                    configRef.set(config);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to invoke @GraphConfig method", e);
+                }
+            }
+        });
+
+        return Optional.ofNullable(configRef.get()).orElseGet(() -> CompileConfig.builder().build());
+
     }
 
     private Object[] prepareArguments(Method method, OverAllState state, RunnableConfig config) {

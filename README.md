@@ -1,38 +1,32 @@
-# saa-graph-composer
+# SAA Graph Composer
 
-通过 **saa-graph-composer**，我们可以简化复杂的 Agent 编排。
+[![codecov](https://codecov.io/github/chrisis58/saa-graph-composer/graph/badge.svg?token=7NINYO6037)](https://codecov.io/github/chrisis58/saa-graph-composer)
 
-## ✨ 功能特性
+SAA Graph Composer 是 Spring AI Alibaba Graph 的声明式编排扩展。
 
-### 1. 声明式开发 (What You Write)
+## ✨ 核心特性
 
-**开发者只需要关注业务逻辑**。通过 `@GraphComposer` 定义蓝图，清晰直观。
+### 🔌 节点即适配器 (Node as Adaptor) 将 Composer 作为纯粹的路由层，编排逻辑与业务实现自然解耦。
+
+### 🧩 代码即图表 (Code as Graph) “所见即所得”的开发体验，像阅读流程图一样阅读代码。
+
+### 🍃 非侵入式原生扩展 基于 Spring 标准生命周期构建，完全兼容官方 API，无缝共存。
+
+## 📦 安装
+
+👉 查看详细安装指南
+
 
 ```java
-@GraphComposer(id = "routed_graph_composer", targetBeanName = "routedGraphCompiled")
-public class RoutedGraphComposer {
+@GraphComposer
+public class HelloGraphComposer {
 
     @GraphKey
-    public static final String KEY_QUERY = "query";
+    public static final String KEY_GREETING = "greeting";
 
-    @GraphKey
-    public static final String KEY_RESULT = "result";
-
-    // avoid using magic values
-    private static final String NODE_B = "nodeB";
-    private static final String NODE_C = "nodeC";
-
-    @ConditionalEdge(source = StateGraph.START, mappings = {"b", NODE_B, "c", NODE_C})
-    public String route(OverAllState state) {
-        String query = state.value(KEY_QUERY).orElseThrow().toString();
-        return query.contains("b") ? "b" : "c";
-    }
-
-    @GraphNode(id = NODE_B, next = StateGraph.END)
-    final AsyncNodeAction nodeB = state -> CompletableFuture.completedFuture(Map.of(KEY_RESULT, "b"));
-
-    @GraphNode(id = NODE_C, next = StateGraph.END)
-    final AsyncNodeAction nodeC = state -> CompletableFuture.completedFuture(Map.of(KEY_RESULT, "c"));
+    @GraphNode(id = "hello", isStart = true, next = StateGraph.END)
+    final NodeAction helloAction = state -> 
+            Map.of(KEY_GREETING, "Hello, Graph Composer!");
 
 }
 ```

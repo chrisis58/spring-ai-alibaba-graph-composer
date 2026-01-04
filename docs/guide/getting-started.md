@@ -1,6 +1,6 @@
 # 快速开始
 
-只需 5 分钟，你就能将第一个声明式 AI Agent 工作流运行起来。
+只需几分钟，你就能将第一个声明式 AI Agent 工作流运行起来。
 
 本指南将带你构建一个最基础的 **"Hello World"** 图。为了演示 **"节点即适配器 (Node as Adaptor)"** 的核心理念，我们将模拟一个简单的业务场景：接收用户名字，调用 Service 处理，然后返回问候语。
 
@@ -10,12 +10,7 @@
 
 * **JDK**: 17 或更高版本
 * **Spring Boot**: 3.3.x 或 3.4.x
-* **Spring AI Alibaba**: 1.1.0.0-M4 (当前验证版本)
-
-::: tip 版本说明
-虽然 spring-ai-alibaba 官方已发布更新的 RC 版本，但本库核心功能目前已在 `1.1.0.0-M4` 环境下完成完整测试。
-为了获得最稳定的体验，建议您在 `pom.xml` 中显式指定该版本。
-:::
+* **Spring AI Alibaba**: 1.1.0.0
 
 ## 2. 引入依赖
 
@@ -24,19 +19,40 @@
 ::: code-group
 
 ```xml [Maven]
+<!-- 1. 添加 JitPack 仓库 -->
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<!-- 2. 添加依赖 -->
 <dependency>
-    <groupId>cn.teacy</groupId>
+    <groupId>com.github.chrisis58</groupId>
     <artifactId>saa-graph-composer</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.0-beta.3</version>
 </dependency>
 
 ```
 
 ```groovy [Gradle]
-implementation 'cn.teacy:saa-graph-composer:0.1.0'
+// 1. 添加 JitPack 仓库
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+
+// 2. 添加依赖
+implementation 'cn.teacy:saa-graph-composer:0.1.0-beta.3'
 
 ```
 
+:::
+
+::: tip 🚀 正式版积极开发中
+当前版本 `0.1.0-beta` 为预览版，核心功能已稳定，API 可能在正式版前有微调。
+我们计划近期发布 1.0.0 正式版，将提供更完善的向后兼容性。
 :::
 
 ## 3. 编写业务逻辑 (Service)
@@ -78,7 +94,7 @@ import com.example.service.GreetingService;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-// 1. 定义目标 Bean 名称，方便在其他地方注入
+// 1. 定义目标 Bean 名称，方便在其他地方注入。如果缺省，本例的目标名称将为 "helloWorldGraph"。
 @GraphComposer(targetBeanName = "hello_world_graph")
 public class HelloWorldGraphComposer {
 
@@ -146,6 +162,7 @@ public class GraphTest {
 
     @Autowired
     // 注入时使用注解中定义的 ID
+    // 由于 CompiledGraph 实例是动态生成的，所以 IDE 可能在此处会提示找不到 Bean，实际运行时不会有问题。
     @Qualifier("hello_world_graph")
     private CompiledGraph graph;
 

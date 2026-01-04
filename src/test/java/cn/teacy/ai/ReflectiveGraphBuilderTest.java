@@ -216,4 +216,45 @@ class ReflectiveGraphBuilderTest {
         final CompileConfig config = CompileConfig.builder().build();
     }
 
+    @DisplayName("Sub-Graph Invocation")
+    @Test
+    void buildSubGraph() {
+        SubGraphComposer subComposer = new SubGraphComposer();
+        CompiledGraph subGraph = builder.build(subComposer);
+
+        ParentGraphComposer parentComposer = new ParentGraphComposer(subGraph);
+        CompiledGraph parentGraph = builder.build(parentComposer);
+
+        OverAllState state = parentGraph.invoke(Map.of(SubGraphComposer.KEY_DATA, "input-")).orElseThrow();
+
+        assertThat(state.value(SubGraphComposer.KEY_DATA).orElse("")).isEqualTo("input-processed by subGraph");
+    }
+
+    @GraphComposer
+    static class SubGraphComposer {
+
+        @GraphKey // shared key
+        public static final String KEY_DATA = "data";
+
+        @GraphNode(id = "subNode", isStart = true, next = StateGraph.END)
+        final NodeAction action = state ->
+            Map.of(KEY_DATA, state.value(KEY_DATA).orElse("") + "processed by subGraph");
+
+    }
+
+    @GraphComposer
+    static class ParentGraphComposer {
+
+        @GraphKey // shared key
+        public static final String KEY_DATA = "data";
+
+        @GraphNode(isStart = true, next = StateGraph.END)
+        final CompiledGraph subGraph;
+
+        public ParentGraphComposer(CompiledGraph subGraph) {
+            this.subGraph = subGraph;
+        }
+
+    }
+
 }

@@ -248,23 +248,21 @@ public class ReflectiveGraphBuilder implements IGraphBuilder {
 
                 try {
                     Object value = field.get(composer);
-
                     if (value == null) {
-                        throw new IllegalStateException("@GraphCompileConfig field '" + field.getName() + "' must not be null.");
+                        throw new GraphDefinitionException("@GraphCompileConfig field '" + field.getName() + "' must not be null.");
                     }
 
                     if (value instanceof CompileConfig) {
                         configRef.set((CompileConfig) value);
                     } else if (value instanceof Supplier) {
                         Object suppliedValue = ((Supplier<?>) value).get();
-
                         if (suppliedValue instanceof CompileConfig) {
                             configRef.set((CompileConfig) suppliedValue);
                         } else {
-                            throw new IllegalStateException("The Supplier in field '" + field.getName() + "' returned null or an invalid type.");
+                            throw new GraphDefinitionException("The Supplier in field '" + field.getName() + "' returned null or an invalid type.");
                         }
                     } else {
-                        throw new IllegalStateException("Field '" + field.getName() + "' must be of type CompileConfig or Supplier<CompileConfig>.");
+                        throw new GraphDefinitionException("Field '" + field.getName() + "' must be of type CompileConfig or Supplier<CompileConfig>.");
                     }
 
                 } catch (IllegalAccessException e) {

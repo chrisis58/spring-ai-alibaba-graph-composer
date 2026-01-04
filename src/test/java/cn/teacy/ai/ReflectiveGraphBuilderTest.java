@@ -2,6 +2,7 @@ package cn.teacy.ai;
 
 import cn.teacy.ai.annotation.*;
 import cn.teacy.ai.core.ReflectiveGraphBuilder;
+import cn.teacy.ai.interfaces.CompileConfigSupplier;
 import com.alibaba.cloud.ai.graph.CompileConfig;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import com.alibaba.cloud.ai.graph.OverAllState;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,7 +70,7 @@ class ReflectiveGraphBuilderTest {
         final AsyncNodeAction nodeC = state -> CompletableFuture.completedFuture(Map.of(KEY_RESULT, "c"));
 
         @GraphCompileConfig
-        final CompileConfig config = CompileConfig.builder().build();
+        final Supplier<CompileConfig> config = () -> CompileConfig.builder().build();
 
     }
 
@@ -171,7 +173,7 @@ class ReflectiveGraphBuilderTest {
         };
 
         @GraphCompileConfig
-        final CompileConfig config = CompileConfig.builder().build();
+        final CompileConfigSupplier config = () -> CompileConfig.builder().build();
     }
 
     @DisplayName("Parallel Nodes (A -> [B,C] -> End) with Append Strategy")

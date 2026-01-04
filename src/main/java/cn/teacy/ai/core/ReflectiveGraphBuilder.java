@@ -17,8 +17,10 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Component
 public class ReflectiveGraphBuilder implements IGraphBuilder {
@@ -131,8 +133,21 @@ public class ReflectiveGraphBuilder implements IGraphBuilder {
                         builder.addNode(nodeId, action);
                     } else if (nodeInstance instanceof AsyncNodeAction action) {
                         builder.addNode(nodeId, action);
+                    } else if (nodeInstance instanceof NodeActionWithConfig action) {
+                        builder.addNode(nodeId, AsyncNodeActionWithConfig.node_async(action));
+                    } else if (nodeInstance instanceof NodeAction action) {
+                        builder.addNode(nodeId, AsyncNodeAction.node_async(action));
+                    } else if (nodeInstance instanceof CompiledGraph subGraph) {
+                        builder.addNode(nodeId, subGraph);
                     } else {
-                        throw new IllegalArgumentException("Field '" + field.getName() + "' annotated with @GraphNode must implement a NodeAction interface.");
+                        String supportedTypes = Set.of(
+                                NodeAction.class,
+                                AsyncNodeAction.class,
+                                NodeActionWithConfig.class,
+                                AsyncNodeActionWithConfig.class,
+                                CompiledGraph.class
+                        ).stream().map(Class::getSimpleName).collect(Collectors.joining(" or "));
+                        throw new IllegalArgumentException("Field '" + field.getName() + "' annotated with @GraphNode must be instance of " + supportedTypes + ". ");
                     }
 
                     if (anno.isStart()) {

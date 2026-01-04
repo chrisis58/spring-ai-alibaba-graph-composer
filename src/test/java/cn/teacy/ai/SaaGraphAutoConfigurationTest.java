@@ -1,8 +1,8 @@
 package cn.teacy.ai;
 
 import cn.teacy.ai.config.SaaGraphComposerAutoConfiguration;
-import cn.teacy.ai.core.GraphAutoRegistrar;
 import cn.teacy.ai.core.IGraphBuilder;
+import cn.teacy.ai.tests.scoped.TestGraphConfig;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -60,6 +62,22 @@ public class SaaGraphAutoConfigurationTest {
         public CompiledGraph build(Object graphComposer) {
             return null;
         }
+    }
+
+    @Test
+    @DisplayName("Should automatically register CompiledGraph bean for @GraphComposer beans")
+    void testAutoRegistration() {
+        runner.withUserConfiguration(TestGraphConfig.class)
+                .run(context -> {
+                    assertThat(context).hasBean("testGraphComposer");
+
+                    assertThat(context).hasSingleBean(CompiledGraph.class);
+
+                    CompiledGraph graph = context.getBean(CompiledGraph.class);
+                    assertThat(graph).isNotNull();
+
+                    assertThat(graph.invoke(Map.of()).isPresent()).isTrue();
+                });
     }
 
 }

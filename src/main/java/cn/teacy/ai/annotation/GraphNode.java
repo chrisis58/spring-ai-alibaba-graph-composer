@@ -20,7 +20,7 @@ public @interface GraphNode {
     /**
      * The next node class in the graph.
      */
-    String next() default "";
+    String[] next() default {};
 
     /**
      * Whether this node is the start node

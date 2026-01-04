@@ -34,6 +34,6 @@ public @interface GraphKey {
     /**
      * Whether this key is for internal use only. (Mark Only)
      */
-    boolean internal() default true;
+    boolean internal() default false;
 
 }

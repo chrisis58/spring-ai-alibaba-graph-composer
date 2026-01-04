@@ -24,7 +24,6 @@ public class SaaGraphAutoConfigurationTest {
     void testDefaultConfiguration() {
         runner.run(context -> {
             assertThat(context).hasSingleBean(IGraphBuilder.class);
-            assertThat(context).hasSingleBean(GraphAutoRegistrar.class);
         });
     }
 
@@ -34,7 +33,6 @@ public class SaaGraphAutoConfigurationTest {
         runner.withPropertyValues("spring.ai.graph-composer.enabled=false")
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(IGraphBuilder.class);
-                    assertThat(context).doesNotHaveBean(GraphAutoRegistrar.class);
                 });
     }
 

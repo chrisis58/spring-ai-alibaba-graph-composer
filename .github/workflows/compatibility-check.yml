@@ -1,0 +1,62 @@
+name: Compatibility Check
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - '.github/workflows/compatibility-check.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - '.github/workflows/compatibility-check.yml'
+  workflow_dispatch:
+
+jobs:
+  compatibility-test:
+    name: SpringBoot ${{ matrix.boot }} + SAA ${{ matrix.saa }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - boot: '3.4.1'
+            saa: '1.1.0.0'
+
+          - boot: '3.3.6'
+            saa: '1.1.0.0'
+
+          - boot: '3.2.5'
+            saa: '1.1.0.0'
+
+          - boot: '3.5.1'
+            saa: '1.1.0.0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Test Compatibility
+        id: test
+        run: >
+          mvn clean test 
+          -Dspring-boot.version=${{ matrix.boot }} 
+          -Dspring-ai-alibaba.version=${{ matrix.saa }}
+
+      - name: Report Result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "| ✅ Pass | ${{ matrix.boot }} | ${{ matrix.saa }} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ❌ Fail | ${{ matrix.boot }} | ${{ matrix.saa }} |" >> $GITHUB_STEP_SUMMARY
+          fi

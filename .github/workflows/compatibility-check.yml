@@ -35,6 +35,12 @@ jobs:
           - boot: '3.5.1'
             saa: '1.1.0.0'
 
+          - boot: '3.4.1'
+            saa: '1.1.0.0-M4'
+
+          - boot: '3.4.1'
+            saa: '1.0.0.4'
+
     steps:
       - uses: actions/checkout@v4
 

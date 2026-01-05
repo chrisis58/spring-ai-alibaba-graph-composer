@@ -9,8 +9,12 @@
 在开始之前，请确保你的开发环境满足以下要求：
 
 * **JDK**: 17 或更高版本
-* **Spring Boot**: 3.3.x 或 3.4.x
+* **Spring Boot**: 3.x
 * **Spring AI Alibaba**: 1.1.0.0
+
+::: warning ⚠️ 不支持的版本
+- Spring AI Alibaba: 1.0.0.x
+:::
 
 ## 2. 引入依赖
 

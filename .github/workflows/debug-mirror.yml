@@ -1,0 +1,45 @@
+name: Debug Mirror Config
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-mirror-download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if custom settings exists
+        run: |
+          if [ -f ".github/ci-settings.xml" ]; then
+            echo "✅ Custom settings file found!"
+            cat .github/ci-settings.xml
+          else
+            echo "❌ Error: .github/ci-settings.xml not found!"
+            exit 1
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          # cache: 'maven'
+
+      # 如果这一步绿了，说明 Google 镜像生效了，403 问题解决
+      - name: Test Download with Mirror
+        run: |
+          echo "🚀 Starting dependency resolution using Google Mirror..."
+          mvn dependency:resolve -Drevision=0.0.1-TEST \
+          -s .github/ci-settings.xml \
+          -e
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
+
+      - name: Verify Effective Settings
+        run: mvn help:effective-settings -s .github/ci-settings.xml
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}

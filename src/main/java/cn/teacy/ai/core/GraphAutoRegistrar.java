@@ -82,7 +82,7 @@ public class GraphAutoRegistrar implements ImportBeanDefinitionRegistrar, Resour
         }
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(CompiledGraph.class);
-        builder.setFactoryMethodOnBean("build", GRAPH_BUILDER_BEAN_NAME);
+        builder.setFactoryMethodOnBean("compile", GRAPH_BUILDER_BEAN_NAME);
 
         builder.addConstructorArgReference(composerBeanName);
 

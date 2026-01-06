@@ -1,7 +1,7 @@
 package cn.teacy.ai;
 
 import cn.teacy.ai.annotation.*;
-import cn.teacy.ai.core.ReflectiveGraphBuilder;
+import cn.teacy.ai.core.ReflectiveGraphCompiler;
 import cn.teacy.ai.interfaces.CompileConfigSupplier;
 import com.alibaba.cloud.ai.graph.CompileConfig;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
@@ -21,20 +21,20 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ReflectiveGraphBuilderTest {
+class ReflectiveGraphCompilerTest {
 
-    private ReflectiveGraphBuilder builder;
+    private ReflectiveGraphCompiler compiler;
 
     @BeforeEach
     void setUp() {
-        builder = new ReflectiveGraphBuilder();
+        compiler = new ReflectiveGraphCompiler();
     }
 
     @Test
     @DisplayName("Build Routed Graph")
     void buildRoutedGraph() {
         RoutedGraphComposer composer = new RoutedGraphComposer();
-        CompiledGraph graph = builder.build(composer);
+        CompiledGraph graph = compiler.compile(composer);
 
         assertThat(graph).isNotNull();
 
@@ -78,7 +78,7 @@ class ReflectiveGraphBuilderTest {
     @DisplayName("Linear Chain (A -> B -> End) with Constructor Init")
     void buildLinearGraph() {
         LinearGraphComposer composer = new LinearGraphComposer();
-        CompiledGraph graph = builder.build(composer);
+        CompiledGraph graph = compiler.compile(composer);
 
         OverAllState state = graph.invoke(Map.of("input", "start")).orElseThrow();
 
@@ -125,7 +125,7 @@ class ReflectiveGraphBuilderTest {
     @DisplayName("Looping & Append Strategy")
     void buildLoopGraph() {
         LoopGraphComposer composer = new LoopGraphComposer();
-        CompiledGraph graph = builder.build(composer);
+        CompiledGraph graph = compiler.compile(composer);
 
         OverAllState state = graph.invoke(Map.of("count", 0)).orElseThrow();
 
@@ -180,7 +180,7 @@ class ReflectiveGraphBuilderTest {
     @Test
     void buildParallelGraph() {
         ParallelGraphComposer composer = new ParallelGraphComposer();
-        CompiledGraph graph = builder.build(composer);
+        CompiledGraph graph = compiler.compile(composer);
 
         OverAllState state = graph.invoke(Map.of()).orElseThrow();
 
@@ -220,10 +220,10 @@ class ReflectiveGraphBuilderTest {
     @Test
     void buildSubGraph() {
         SubGraphComposer subComposer = new SubGraphComposer();
-        CompiledGraph subGraph = builder.build(subComposer);
+        CompiledGraph subGraph = compiler.compile(subComposer);
 
         ParentGraphComposer parentComposer = new ParentGraphComposer(subGraph);
-        CompiledGraph parentGraph = builder.build(parentComposer);
+        CompiledGraph parentGraph = compiler.compile(parentComposer);
 
         OverAllState state = parentGraph.invoke(Map.of(SubGraphComposer.KEY_DATA, "input-")).orElseThrow();
 
@@ -261,7 +261,7 @@ class ReflectiveGraphBuilderTest {
     @DisplayName("Routing Edges with Different Action Types")
     void buildRoutingGraph() {
         RoutingGraphComposer composer = new RoutingGraphComposer();
-        CompiledGraph graph = builder.build(composer);
+        CompiledGraph graph = compiler.compile(composer);
 
         OverAllState state = graph.invoke(Map.of()).orElseThrow();
 

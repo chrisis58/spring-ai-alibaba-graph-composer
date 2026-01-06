@@ -1,7 +1,7 @@
 package cn.teacy.ai.config;
 
-import cn.teacy.ai.core.IGraphBuilder;
-import cn.teacy.ai.core.ReflectiveGraphBuilder;
+import cn.teacy.ai.core.GraphCompiler;
+import cn.teacy.ai.core.ReflectiveGraphCompiler;
 import cn.teacy.ai.properties.SaaGraphComposerProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -18,8 +18,8 @@ public class SaaGraphComposerAutoConfiguration {
 
     @Bean(GRAPH_BUILDER_BEAN_NAME)
     @ConditionalOnMissingBean(name = GRAPH_BUILDER_BEAN_NAME)
-    public IGraphBuilder graphBuilder() {
-        return new ReflectiveGraphBuilder();
+    public GraphCompiler graphBuilder() {
+        return new ReflectiveGraphCompiler();
     }
 
 }

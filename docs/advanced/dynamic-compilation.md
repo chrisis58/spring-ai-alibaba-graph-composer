@@ -7,12 +7,12 @@
 1. **显式配置**：为了消除 IDE 的自动注入告警，或获得更强的类型安全支持。
 2. **单元测试**：在不启动 Spring 上下文的情况下快速测试图逻辑。
 
-## 核心接口：IGraphBuilder
+## 核心接口：GraphCompiler
 
-`IGraphBuilder` 是框架的核心构建器接口。它的职责是将一个包含 `@GraphComposer` 注解的 Java 对象，解析并编译为可执行的 `CompiledGraph`。
+`GraphCompiler` 是框架的核心构建器接口。它的职责是将一个包含 `@GraphComposer` 注解的 Java 对象，解析并编译为可执行的 `CompiledGraph`。
 
 ```java
-public interface IGraphBuilder {
+public interface GraphCompiler {
     /**
      * 将图定义对象编译为可执行图
      * @param graphComposer 包含 @GraphComposer 注解的对象实例
@@ -33,17 +33,17 @@ public interface IGraphBuilder {
 
 ### 2. 定义配置类
 
-创建一个 `@Configuration` 类，注入框架自动提供的 `IGraphBuilder`，并手动注册每一个图。
+创建一个 `@Configuration` 类，注入框架自动提供的 `GraphCompiler`，并手动注册每一个图。
 
 ```java
 @Configuration
 public class GraphConfig {
 
-    private IGraphBuilder graphBuilder;
+    private GraphCompiler graphCompiler;
 
-    public GraphConfig(IGraphBuilder graphBuilder) {
+    public GraphConfig(GraphCompiler graphCompiler) {
         // 注入框架默认的构建器实现
-        this.graphBuilder = graphBuilder;
+        this.graphCompiler = graphCompiler;
     }
 
     /**
@@ -55,12 +55,12 @@ public class GraphConfig {
     @Bean
     public CompiledGraph logAnalysisGraph(LogAnalysisGraphComposer composer) {
         // 实例化图定义
-        return graphBuilder.build(composer);
+        return graphCompiler.compile(composer);
     }
 
     @Bean
     public CompiledGraph otherGraph() {
-        return graphBuilder.build(new OtherGraphComposer());
+        return graphCompiler.compile(new OtherGraphComposer());
     }
 }
 
@@ -81,7 +81,7 @@ public class MyService {
 
 ## 单元测试 (非 Spring 环境)
 
-在编写单元测试时，启动整个 Spring Boot 上下文通常比较耗时。由于 `IGraphBuilder` 的逻辑通常不依赖 Spring 容器，你可以直接实例化它来测试图逻辑。
+在编写单元测试时，启动整个 Spring Boot 上下文通常比较耗时。由于 `GraphCompiler` 的逻辑通常不依赖 Spring 容器，你可以直接实例化它来测试图逻辑。
 
 ### 示例代码
 
@@ -98,15 +98,17 @@ public class MyWorkflow {
 编写 JUnit 测试：
 
 ```java
-import cn.teacy.ai.core.ReflectiveGraphBuilder;
+import cn.teacy.ai.core.GraphCompiler;
+import cn.teacy.ai.core.ReflectiveGraphCompiler;
 import org.junit.jupiter.api.Test;
+
 import java.util.Map;
 
 class MyWorkflowTest {
 
     // 1. 直接 new 一个构建器 (无需 Spring)
     // 注意：请使用框架提供的具体实现类
-    private final IGraphBuilder graphBuilder = new ReflectiveGraphBuilder();
+    private final GraphCompiler graphCompiler = new ReflectiveGraphCompiler();
 
     @Test
     void testFlowExecution() {
@@ -114,12 +116,12 @@ class MyWorkflowTest {
         MyWorkflow workflow = new MyWorkflow();
 
         // 3. 手动编译
-        CompiledGraph graph = graphBuilder.build(workflow);
+        CompiledGraph graph = graphCompiler.compile(workflow);
 
         // 4. 执行与断言
         Map<String, Object> input = Map.of("data", "test");
         Map<String, Object> result = graph.invoke(input);
-        
+
         // 断言结果...
     }
 }

@@ -1,7 +1,7 @@
 package cn.teacy.ai;
 
 import cn.teacy.ai.annotation.*;
-import cn.teacy.ai.core.ReflectiveGraphBuilder;
+import cn.teacy.ai.core.ReflectiveGraphCompiler;
 import cn.teacy.ai.exception.GraphDefinitionException;
 import com.alibaba.cloud.ai.graph.CompileConfig;
 import com.alibaba.cloud.ai.graph.StateGraph;
@@ -18,19 +18,19 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class ReflectiveGraphBuilderErrorTest {
+class ReflectiveGraphCompilerErrorTest {
 
-    private ReflectiveGraphBuilder builder;
+    private ReflectiveGraphCompiler builder;
 
     @BeforeEach
     void setUp() {
-        builder = new ReflectiveGraphBuilder();
+        builder = new ReflectiveGraphCompiler();
     }
 
     @Test
     @DisplayName("Should throw exception when @GraphComposer is missing")
     void throwExceptionMissingAnnotation() {
-        assertThatThrownBy(() -> builder.build(new Object()))
+        assertThatThrownBy(() -> builder.compile(new Object()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("@GraphComposer");
     }
@@ -39,7 +39,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for invalid Node Action type")
     void throwExceptionInvalidNodeType() {
         InvalidNodeTypeComposer composer = new InvalidNodeTypeComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
                 .satisfies(e -> {
@@ -57,7 +57,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for duplicate Node IDs")
     void throwExceptionDuplicateNodeIds() {
         DuplicateNodeIdComposer composer = new DuplicateNodeIdComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("already exist");
     }
@@ -75,7 +75,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for null Node Action")
     void throwExceptionNullNodeAction() {
         NullNodeComposer composer = new NullNodeComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasCauseInstanceOf(IllegalStateException.class)
                 .satisfies(e -> {
@@ -93,7 +93,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for non-String Graph Key")
     void throwExceptionNonStringGraphKey() {
         NonStringKeyComposer composer = new NonStringKeyComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("must be String");
     }
@@ -108,7 +108,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for non-static Graph Key")
     void throwExceptionNonStaticGraphKey() {
         NonStaticKeyComposer composer = new NonStaticKeyComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("must be 'static'");
     }
@@ -123,7 +123,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for non-final Graph Key")
     void throwExceptionNonFinalGraphKey() {
         NonFinalKeyComposer composer = new NonFinalKeyComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("must be 'final'");
     }
@@ -138,7 +138,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for null Edge Action")
     void throwExceptionNullEdgeAction() {
         NullRoutingComposer composer = new NullRoutingComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("is null");
     }
@@ -153,7 +153,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for unsupported Edge Action type")
     void throwExceptionUnsupportedEdgeType() {
         UnsupportedEdgeTypeComposer composer = new UnsupportedEdgeTypeComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("is not supported. Must be one of");
     }
@@ -168,7 +168,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for null CompileConfig")
     void throwExceptionNullCompileConfig() {
         NullCompileConfigGraphComposer composer = new NullCompileConfigGraphComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("must not be null");
     }
@@ -184,12 +184,12 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for unsupported CompileConfig type")
     void throwExceptionUnsupportedCompileConfigType() {
         NotSupportTypeCompileConfigGraphComposer composer = new NotSupportTypeCompileConfigGraphComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("must be of type");
 
         NotSupportSupplierTypeCompileConfigGraphComposer composerB = new NotSupportSupplierTypeCompileConfigGraphComposer();
-        assertThatThrownBy(() -> builder.build(composerB))
+        assertThatThrownBy(() -> builder.compile(composerB))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasMessageContaining("returned null or an invalid type");
     }
@@ -212,7 +212,7 @@ class ReflectiveGraphBuilderErrorTest {
     @DisplayName("Should throw exception for invalid Edge mapping")
     void throwExceptionInvalidEdgeMapping() {
         InvalidRouteMappingGraphComposer composer = new InvalidRouteMappingGraphComposer();
-        assertThatThrownBy(() -> builder.build(composer))
+        assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
                 .satisfies(e -> {

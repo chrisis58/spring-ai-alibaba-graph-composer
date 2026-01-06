@@ -21,11 +21,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-public class ReflectiveGraphBuilder implements IGraphBuilder {
+public class ReflectiveGraphCompiler implements GraphCompiler {
 
-    private static final Logger log = LoggerFactory.getLogger(ReflectiveGraphBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(ReflectiveGraphCompiler.class);
 
-    public CompiledGraph build(Object graphComposer) {
+    public CompiledGraph compile(Object graphComposer) {
         Class<?> clazz = graphComposer.getClass();
         GraphComposer composerAnno = clazz.getAnnotation(GraphComposer.class);
 

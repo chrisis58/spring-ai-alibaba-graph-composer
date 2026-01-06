@@ -4,7 +4,7 @@ package cn.teacy.ai;
 import cn.teacy.ai.annotation.GraphComposer;
 import cn.teacy.ai.annotation.GraphKey;
 import cn.teacy.ai.annotation.GraphNode;
-import cn.teacy.ai.core.ReflectiveGraphBuilder;
+import cn.teacy.ai.core.ReflectiveGraphCompiler;
 import cn.teacy.ai.interfaces.GraphBuildLifecycle;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import com.alibaba.cloud.ai.graph.OverAllState;
@@ -22,17 +22,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class GraphBuildLifeCycleTest {
 
-    private ReflectiveGraphBuilder builder;
+    private ReflectiveGraphCompiler builder;
 
     @BeforeEach
     void setUp() {
-        builder = new ReflectiveGraphBuilder();
+        builder = new ReflectiveGraphCompiler();
     }
 
     @DisplayName("Manual Build: Pure Lifecycle Implementation")
     @Test
     void manualBuildByGraphBuildLifecycle() {
-        CompiledGraph compiledGraph = builder.build(new ManualGraphComposer());
+        CompiledGraph compiledGraph = builder.compile(new ManualGraphComposer());
 
         OverAllState state = compiledGraph.invoke(Map.of()).orElseThrow();
 
@@ -71,7 +71,7 @@ public class GraphBuildLifeCycleTest {
     @Test
     void hybridBuildTest() {
         HybridGraphComposer composer = new HybridGraphComposer();
-        CompiledGraph compiledGraph = builder.build(composer);
+        CompiledGraph compiledGraph = builder.compile(composer);
 
         OverAllState state = compiledGraph.invoke(Map.of("input", "test")).orElseThrow();
 

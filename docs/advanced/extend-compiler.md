@@ -242,7 +242,7 @@ public class MyGraphConfig {
     // public GraphCompiler graphCompiler() { ... }
 
     // ❌ 错误：Bean 名称默认为 "customCompiler"
-    // 框架会检测到 "graphBuilder" 缺失，从而再次创建默认编译器。
+    // 框架会检测到 "graphCompiler" 缺失，从而再次创建默认编译器。
     // 结果：你的自定义逻辑不会生效。
     @Bean
     public GraphCompiler customCompiler() {

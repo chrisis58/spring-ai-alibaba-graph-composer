@@ -36,6 +36,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         void execute(StateGraph builder) throws GraphStateException;
     }
 
+    @Override
     public final CompiledGraph compile(Object graphComposer) {
         Class<?> clazz = graphComposer.getClass();
         GraphComposer composerAnno = clazz.getAnnotation(GraphComposer.class);

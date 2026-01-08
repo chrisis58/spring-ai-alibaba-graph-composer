@@ -148,16 +148,23 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             throw new IllegalStateException("GraphNode field '" + field.getName() + "' is null. Please initialize it.");
         }
 
+        String fieldName = field.getName();
+
         if (nodeInstance instanceof AsyncNodeActionWithConfig action) {
-            context.operations.add(builder -> builder.addNode(nodeId, action));
+            registerOperation(context, b -> b.addNode(nodeId, action),
+                    "add AsyncNodeActionWithConfig node '%s' (field: %s)", nodeId, fieldName);
         } else if (nodeInstance instanceof AsyncNodeAction action) {
-            context.operations.add(builder -> builder.addNode(nodeId, action));
+            registerOperation(context, b -> b.addNode(nodeId, action),
+                    "add AsyncNodeAction node '%s' (field: %s)", nodeId, fieldName);
         } else if (nodeInstance instanceof NodeActionWithConfig action) {
-            context.operations.add(builder -> builder.addNode(nodeId, AsyncNodeActionWithConfig.node_async(action)));
+            registerOperation(context, b -> b.addNode(nodeId, AsyncNodeActionWithConfig.node_async(action)),
+                    "add NodeActionWithConfig node '%s' (field: %s)", nodeId, fieldName);
         } else if (nodeInstance instanceof NodeAction action) {
-            context.operations.add(builder -> builder.addNode(nodeId, AsyncNodeAction.node_async(action)));
+            registerOperation(context, b -> b.addNode(nodeId, AsyncNodeAction.node_async(action)),
+                    "add NodeAction node '%s' (field: %s)", nodeId, fieldName);
         } else if (nodeInstance instanceof CompiledGraph subGraph) {
-            context.operations.add(builder -> builder.addNode(nodeId, subGraph));
+            registerOperation(context, b -> b.addNode(nodeId, subGraph),
+                    "add SubGraph node '%s' (field: %s)", nodeId, fieldName);
         } else {
             String supportedTypes = Set.of(
                     NodeAction.class,
@@ -170,14 +177,18 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         }
 
         if (annotation.isStart()) {
-            context.operations.add(builder -> builder.addEdge(StateGraph.START, nodeId));
+            registerOperation(context,
+                    builder -> builder.addEdge(StateGraph.START, nodeId),
+                    "add start edge to node '%s' (field: %s)", nodeId, fieldName);
         }
 
         for (String next : annotation.next()) {
             if (!StringUtils.hasText(next)) {
                 continue;
             }
-            context.operations.add(builder -> builder.addEdge(nodeId, next));
+            registerOperation(context,
+                    builder -> builder.addEdge(nodeId, next),
+                    "add edge from node '%s' to next node '%s' (field: %s)", nodeId, next, fieldName);
         }
 
     }
@@ -195,9 +206,12 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
                     + "' is null. Please initialize it with a lambda expression or instance.");
         }
 
-        AsyncCommandAction unifiedAction = getUnifiedAction(fieldVal, field.getName());
+        String fieldName = field.getName();
+        AsyncCommandAction unifiedAction = getUnifiedAction(fieldVal, fieldName);
 
-        context.operations.add(builder -> builder.addConditionalEdges(sourceNodeId, unifiedAction, routeMap));
+        registerOperation(context,
+                builder -> builder.addConditionalEdges(sourceNodeId, unifiedAction, routeMap),
+                "add ConditionalEdges from source node '%s' (field: %s)", sourceNodeId, fieldName);
     }
 
     @Nonnull
@@ -258,6 +272,24 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             map.put(mappings[i], mappings[i + 1]);
         }
         return map;
+    }
+
+    /** Register a graph operation with error handling. */
+    protected void registerOperation(
+            CompileContext context,
+            GraphOperation operation,
+            String errorFormat,
+            Object... args
+    ) {
+        context.operations.add(builder -> {
+            try {
+                operation.execute(builder);
+            } catch (Exception e) {
+                String contextMsg = String.format(errorFormat, args);
+                log.error("Error during graph build: {}", contextMsg, e);
+                throw new GraphDefinitionException(String.format("Failed to %s. Cause: %s", contextMsg, e.getMessage()), e);
+            }
+        });
     }
 
     /** Placeholder for handling other field types in the future. */

@@ -13,4 +13,7 @@ public class OtherWorkflow {
     @GraphNode(id = "onlyNode", isStart = true, next = StateGraph.END)
     final NodeAction action = state -> Collections.emptyMap();
 
+    @OtherAnnotation
+    private static final String OTHER_ANNOTATED_VALUE = "other annotated value";
+
 }

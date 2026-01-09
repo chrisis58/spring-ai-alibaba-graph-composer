@@ -9,16 +9,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import static cn.teacy.ai.constants.ComposerConfigConstants.GRAPH_BUILDER_BEAN_NAME;
+import static cn.teacy.ai.constants.ComposerConfigConstants.GRAPH_COMPILER_BEAN_NAME;
 
 @AutoConfiguration
 @EnableConfigurationProperties(SaaGraphComposerProperties.class)
 @ConditionalOnProperty(prefix = "spring.ai.graph-composer", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SaaGraphComposerAutoConfiguration {
 
-    @Bean(GRAPH_BUILDER_BEAN_NAME)
-    @ConditionalOnMissingBean(name = GRAPH_BUILDER_BEAN_NAME)
-    public GraphCompiler graphBuilder() {
+    @Bean(GRAPH_COMPILER_BEAN_NAME)
+    @ConditionalOnMissingBean(name = GRAPH_COMPILER_BEAN_NAME)
+    public GraphCompiler graphCompiler() {
         return new ReflectiveGraphCompiler();
     }
 

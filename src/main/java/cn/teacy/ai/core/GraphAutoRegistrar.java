@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static cn.teacy.ai.constants.ComposerConfigConstants.GRAPH_BUILDER_BEAN_NAME;
+import static cn.teacy.ai.constants.ComposerConfigConstants.GRAPH_COMPILER_BEAN_NAME;
 
 public class GraphAutoRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoaderAware {
 
@@ -82,7 +82,7 @@ public class GraphAutoRegistrar implements ImportBeanDefinitionRegistrar, Resour
         }
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(CompiledGraph.class);
-        builder.setFactoryMethodOnBean("compile", GRAPH_BUILDER_BEAN_NAME);
+        builder.setFactoryMethodOnBean("compile", GRAPH_COMPILER_BEAN_NAME);
 
         builder.addConstructorArgReference(composerBeanName);
 

@@ -1,6 +1,7 @@
 package cn.teacy.ai;
 
 import cn.teacy.ai.config.SaaGraphComposerAutoConfiguration;
+import cn.teacy.ai.constants.ComposerConfigConstants;
 import cn.teacy.ai.core.GraphCompiler;
 import cn.teacy.ai.tests.another.AnotherTestGraphConfig;
 import cn.teacy.ai.tests.scoped.TestGraphConfig;
@@ -52,8 +53,8 @@ public class SaaGraphAutoConfigurationTest {
 
     @Configuration
     static class UserConfig {
-        @Bean
-        public GraphCompiler graphBuilder() {
+        @Bean(ComposerConfigConstants.GRAPH_COMPILER_BEAN_NAME)
+        public GraphCompiler graphCompiler() {
             return new CustomGraphCompiler();
         }
     }

@@ -33,9 +33,23 @@ export default defineConfig({
         items: [
           { text: '手动与动态编译', link: '/advanced/dynamic-compilation' },
           { text: '生命周期钩子', link: '/advanced/hooks-lifecycle' },
+          { text: '扩展 Graph Compiler', link: '/advanced/extend-compiler' }
         ]
       }
     ],
+
+    lastUpdated: {
+      text: '最后更新于',
+      formatOptions: {
+        dateStyle: 'short',
+        timeStyle: 'medium'
+      }
+    },
+
+    editLink: {
+      pattern: 'https://github.com/chrisis58/saa-graph-composer/edit/main/docs/:path',
+      text: '在 GitHub 上编辑此页'
+    },
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/chrisis58/saa-graph-composer' }

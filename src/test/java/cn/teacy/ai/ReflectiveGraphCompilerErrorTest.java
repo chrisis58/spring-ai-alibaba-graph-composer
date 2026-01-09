@@ -42,9 +42,7 @@ class ReflectiveGraphCompilerErrorTest {
         assertThatThrownBy(() -> builder.compile(composer))
                 .isInstanceOf(GraphDefinitionException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
-                .satisfies(e -> {
-                    assertThat(e.getCause()).hasMessageContaining("must be instance of");
-                });
+                .hasMessageContaining("Must be one of");
     }
 
     @GraphComposer

@@ -11,7 +11,7 @@ public class UnifyUtils {
 
     @Nonnull
     public static AsyncCommandAction getUnifiedCommandAction(@Nonnull Object val) {
-        Objects.requireNonNull(val, "CommandAction value cannot be null");
+        Objects.requireNonNull(val, "Action value cannot be null");
 
         if (val instanceof AsyncCommandAction action) {
             return action;
@@ -23,12 +23,12 @@ public class UnifyUtils {
             return AsyncCommandAction.of(AsyncEdgeAction.edge_async(action));
         }
 
-        throw new IllegalArgumentException("Unexpected type for CommandAction: " + val.getClass());
+        throw new IllegalArgumentException("Unexpected type for Action: " + val.getClass());
     }
 
     @Nonnull
     public static AsyncNodeActionWithConfig getUnifiedNodeAction(@Nonnull Object val) {
-        Objects.requireNonNull(val, "NodeAction value cannot be null");
+        Objects.requireNonNull(val, "Action value cannot be null");
 
         if (val instanceof AsyncNodeActionWithConfig action) {
             return action;
@@ -40,7 +40,7 @@ public class UnifyUtils {
             return AsyncNodeActionWithConfig.of(AsyncNodeAction.node_async(action));
         }
 
-        throw new IllegalArgumentException("Unexpected type for NodeAction: " + val.getClass());
+        throw new IllegalArgumentException("Unexpected type for Action: " + val.getClass());
     }
 
 }

@@ -44,7 +44,7 @@ protected static class CompileContext {
     public boolean containsKey(String key) { ... }
 
     /** 注册 Key 策略 */
-    public void addKeyStrategy(String key, KeyStrategy strategy, String fieldName) { ... }
+    public void addKeyStrategy(String key, KeyStrategy strategy) { ... }
 
     /**
      * 注册图构建操作
@@ -63,7 +63,7 @@ protected interface GraphOperation {
 ```
 
 ::: info 关于 `GraphOperation`
-扩展逻辑的主要任务调用 `context#registerOperation` 来注册 `GraphOperation`。这些操作不会立即执行，而是在解析完图的定义后，在 `compile` 方法的最后阶段统一应用到 `StateGraph` 构建器上。
+扩展逻辑的主要任务是调用 `context#registerOperation` 来注册 `GraphOperation`。这些操作不会立即执行，而是在解析完图的定义后，在 `compile` 方法的最后阶段统一应用到 `StateGraph` 构建器上。
 :::
 
 ## 2. 示例一：支持批量节点注册

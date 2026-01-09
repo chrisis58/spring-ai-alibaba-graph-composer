@@ -202,7 +202,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
                         "add SubGraph node '%s' (field: %s)", nodeId, fieldName);
             } else {
                 AsyncNodeActionWithConfig action = UnifyUtils.getUnifiedNodeAction(nodeInstance);
-                context.registerOperation( b -> b.addNode(nodeId, action),
+                context.registerOperation(b -> b.addNode(nodeId, action),
                         "add NodeAction node '%s' (field: %s)", nodeId, fieldName);
             }
         } catch (IllegalArgumentException e) {
@@ -293,7 +293,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
     /**
      * Extension point for handling fields that are not annotated with any of the
      * framework's recognized graph annotations.
-     * <p />
+     * <p>
      * The default implementation only logs that the field was ignored. Subclasses
      * may override this method to process custom annotations or additional field
      * types that are specific to their own usage.

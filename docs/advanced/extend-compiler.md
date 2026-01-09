@@ -104,6 +104,10 @@ public class MyCustomCompiler extends ReflectiveGraphCompiler {
 
 ```
 
+::: tip 最佳实践
+为简化示例，这里直接向 `context.operations()` 添加操作。实际使用中，请使用 `ReflectiveGraphCompiler#registerOperation` 方法来注册操作来获取更好的异常处理以快速定位。
+:::
+
 ## 3. 示例二：支持自定义注解
 
 除了扩展节点，你还可以引入全新的注解来改变图的构建方式。
@@ -170,6 +174,10 @@ public class MyFullFeatureCompiler extends ReflectiveGraphCompiler {
 }
 
 ```
+
+::: tip 最佳实践
+为简化示例，这里直接向 `context.operations()` 添加操作。实际使用中，请使用 `ReflectiveGraphCompiler#registerOperation` 方法来注册操作来获取更好的异常处理以快速定位。
+:::
 
 ## 4. 综合使用示例
 

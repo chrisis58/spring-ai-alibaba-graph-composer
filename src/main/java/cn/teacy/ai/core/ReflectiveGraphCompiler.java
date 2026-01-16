@@ -191,6 +191,10 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         Object nodeInstance = ReflectionUtils.getField(field, context.composerInstance());
 
         if (nodeInstance == null) {
+            nodeInstance = resolveMissingField(field, nodeId);
+        }
+
+        if (nodeInstance == null) {
             throw new IllegalStateException("GraphNode field '" + field.getName() + "' is null. Please initialize it.");
         }
 
@@ -234,6 +238,10 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         Object fieldVal = ReflectionUtils.getField(field, context.composerInstance());
 
         if (fieldVal == null) {
+            fieldVal = resolveMissingField(field, null);
+        }
+
+        if (fieldVal == null) {
             throw new GraphDefinitionException("Conditional Edge field '"
                     + field.getName()
                     + "' is null. Please initialize it with a lambda expression or instance.");
@@ -259,6 +267,10 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
 
         ReflectionUtils.makeAccessible(field);
         Object value = ReflectionUtils.getField(field, context.composerInstance());
+
+        if (value == null) {
+            value = resolveMissingField(field, null);
+        }
 
         if (value == null) {
             throw new GraphDefinitionException("@GraphCompileConfig field '" + field.getName() + "' must not be null.");
@@ -306,6 +318,17 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             return;
         }
         log.debug("Field '{}' is not annotated with recognized graph annotations.", field.getName());
+    }
+
+    /**
+     * Extension point for handling null fields annotated with graph-related annotations.
+     *
+     * @param field the field that is null
+     * @return an object to use in place of the null field, or null to indicate no substitution
+     */
+    @Nullable
+    protected Object resolveMissingField(Field field, @Nullable String candidateName) {
+        return null;
     }
 
 }

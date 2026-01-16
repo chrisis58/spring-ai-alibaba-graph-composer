@@ -231,7 +231,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
     }
 
     protected void handleConditionalEdge(CompileContext context, Field field, ConditionalEdge annotation) {
-        Map<String, String> routeMap = parseMappings(annotation.mappings(), field.getName());
+        Map<String, String> routeMap = parseMappings(annotation.mappings(), annotation.routes(), field.getName());
         String sourceNodeId = annotation.source();
 
         ReflectionUtils.makeAccessible(field);
@@ -291,11 +291,17 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
 
     }
 
-    private Map<String, String> parseMappings(String[] mappings, String fieldName) {
+    private Map<String, String> parseMappings(String[] mappings, String[] routes, String fieldName) {
         if (mappings.length % 2 != 0) {
             throw new IllegalArgumentException("Mappings must be pairs in field: " + fieldName);
         }
+        if (mappings.length == 0 && routes.length == 0) {
+            throw new IllegalArgumentException("Either mappings or routes must be provided in field: " + fieldName);
+        }
         Map<String, String> map = new HashMap<>();
+        for (String route : routes) {
+            map.put(route, route);
+        }
         for (int i = 0; i < mappings.length; i += 2) {
             map.put(mappings[i], mappings[i + 1]);
         }

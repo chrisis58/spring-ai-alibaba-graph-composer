@@ -166,10 +166,10 @@ class ReflectiveGraphCompilerTest {
             return CompletableFuture.completedFuture(Map.of(KEY_COUNT, count + 1));
         };
 
-        @ConditionalEdge(source = NODE_CHECK, mappings = {"loop", NODE_PROCESS, "end", StateGraph.END})
+        @ConditionalEdge(source = NODE_CHECK, routes = {NODE_PROCESS, StateGraph.END})
         final EdgeAction checkLoop = state -> {
             Integer count = (Integer) state.value(KEY_COUNT).orElse(0);
-            return count < 3 ? "loop" : "end";
+            return count < 3 ? NODE_PROCESS : StateGraph.END;
         };
 
         @GraphCompileConfig

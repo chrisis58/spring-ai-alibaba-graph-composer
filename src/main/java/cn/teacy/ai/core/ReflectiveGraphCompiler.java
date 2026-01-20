@@ -1,5 +1,6 @@
 package cn.teacy.ai.core;
 
+import ch.qos.logback.core.joran.action.AppenderAction;
 import cn.teacy.ai.annotation.*;
 import cn.teacy.ai.exception.GraphDefinitionException;
 import cn.teacy.ai.interfaces.GraphBuildLifecycle;
@@ -7,6 +8,9 @@ import cn.teacy.ai.utils.UnifyUtils;
 import com.alibaba.cloud.ai.graph.*;
 import com.alibaba.cloud.ai.graph.action.*;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
+import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
+import com.alibaba.cloud.ai.graph.state.strategy.MergeStrategy;
+import com.alibaba.cloud.ai.graph.state.strategy.ReplaceStrategy;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -76,7 +80,16 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             );
         }
 
-        public KeyStrategy getKeyStrategy(Class<? extends KeyStrategy> keyStrategyClass) {
+        public KeyStrategy getKeyStrategy(@Nonnull Class<? extends KeyStrategy> keyStrategyClass) {
+            // caching predefined strategies
+            if (keyStrategyClass == ReplaceStrategy.class) {
+                return KeyStrategy.REPLACE;
+            } else if (keyStrategyClass == AppendStrategy.class) {
+                return KeyStrategy.APPEND;
+            } else if (keyStrategyClass == MergeStrategy.class) {
+                return KeyStrategy.MERGE;
+            }
+
             return strategyCache.computeIfAbsent(keyStrategyClass, BeanUtils::instantiateClass);
         }
 

@@ -3,19 +3,20 @@ package cn.teacy.ai;
 import cn.teacy.ai.annotation.*;
 import cn.teacy.ai.core.ReflectiveGraphCompiler;
 import cn.teacy.ai.interfaces.CompileConfigSupplier;
-import com.alibaba.cloud.ai.graph.CompileConfig;
-import com.alibaba.cloud.ai.graph.CompiledGraph;
-import com.alibaba.cloud.ai.graph.OverAllState;
-import com.alibaba.cloud.ai.graph.StateGraph;
+import com.alibaba.cloud.ai.graph.*;
 import com.alibaba.cloud.ai.graph.action.*;
 import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
+import com.alibaba.cloud.ai.graph.state.strategy.MergeStrategy;
+import com.alibaba.cloud.ai.graph.state.strategy.ReplaceStrategy;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -297,6 +298,58 @@ class ReflectiveGraphCompilerTest {
         @GraphNode(id = NODE_C)
         final NodeAction nodeC = state -> Map.of();
 
+    }
+
+    @Test
+    @DisplayName("Multiple Key Strategies, Predefined and Custom")
+    void buildMultiTypeGraph() {
+        MultiTypeGraphKeysComposer composer = new MultiTypeGraphKeysComposer();
+        CompiledGraph graph = compiler.compile(composer);
+        assertThat(graph).isNotNull();
+
+        OverAllState state = graph.invoke(Map.of()).orElseThrow();
+        assertThat(state.value(MultiTypeGraphKeysComposer.KEY_FIRST_SET, "")).isEqualTo("value1");
+    }
+
+    @GraphComposer
+    static class MultiTypeGraphKeysComposer {
+
+        @GraphKey(strategy = ReplaceStrategy.class)
+        public static final String KEY_REPLACE = "replace_key";
+
+        @GraphKey(strategy = AppendStrategy.class)
+        public static final String KEY_APPEND = "append_key";
+
+        @GraphKey(strategy = MergeStrategy.class)
+        public static final String KEY_MERGE = "merge_key";
+
+        @GraphKey(strategy = FirstSetStrategy.class)
+        public static final String KEY_FIRST_SET = "first_set_key";
+
+        @GraphNode(id = "node", isStart = true, next = "node2")
+        final NodeAction node = state -> Map.of(
+                KEY_FIRST_SET, "value1"
+        );
+
+        @GraphNode(id = "node2", next = StateGraph.END)
+        final NodeAction node2 = state -> Map.of(
+                KEY_FIRST_SET, "value2"
+        );
+
+    }
+
+    static class FirstSetStrategy implements KeyStrategy {
+        @Override
+        public Object apply(Object oldValue, Object newValue) {
+            if (oldValue instanceof Optional<?> oldValueOptional) {
+                if (oldValueOptional.isPresent()) {
+                    return oldValueOptional.get();
+                } else {
+                    return newValue;
+                }
+            }
+            return oldValue != null ? oldValue : newValue;
+        }
     }
 
 }

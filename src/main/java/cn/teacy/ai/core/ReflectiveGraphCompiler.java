@@ -30,6 +30,8 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         private final List<GraphOperation> operations = new ArrayList<>();
         private CompileConfig compileConfig;
 
+        private final Map<Class<? extends KeyStrategy>, KeyStrategy> strategyCache = new HashMap<>();
+
         protected CompileContext(Object composerInstance) {
             this.composerInstance = composerInstance;
         }
@@ -72,6 +74,10 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
                     List.copyOf(operations),
                     compileConfig
             );
+        }
+
+        public KeyStrategy getKeyStrategy(Class<? extends KeyStrategy> keyStrategyClass) {
+            return strategyCache.computeIfAbsent(keyStrategyClass, BeanUtils::instantiateClass);
         }
 
     }
@@ -179,7 +185,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             throw new GraphDefinitionException("Duplicate Graph Key: " + keyName + ". Defined in field: " + field.getName());
         }
 
-        KeyStrategy strategy = BeanUtils.instantiateClass(annotation.strategy());
+        KeyStrategy strategy = context.getKeyStrategy(annotation.strategy());
 
         context.addKeyStrategy(keyName, strategy);
     }

@@ -230,6 +230,68 @@ public class SpringReflectiveGraphCompilerTest {
 
     }
 
+    @Test
+    @DisplayName("Spring bean injection should fallback to field name when id do not match")
+    void testSpringBeanInjectionWithMismatchedType() {
+        runner.withUserConfiguration(TestConfiguration.class)
+                .run(context -> {
+                    GraphCompiler compiler = context.getBean(GraphCompiler.class);
+                    IndexedByNodeIdWithMismatchedTypeSpringContextGraphComposer composer = new IndexedByNodeIdWithMismatchedTypeSpringContextGraphComposer();
+                    var compiledGraph = compiler.compile(composer);
+
+                    var state = compiledGraph.invoke(Map.of()).orElseThrow();
+                    Optional<Object> output = state.value(OUTPUT);
+                    Assertions.assertThat(output).isPresent();
+
+                    Assertions.assertThat(output.get())
+                            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                            .hasSize(1)
+                            .containsExactlyInAnyOrder("asyncNodeA executed");
+                });
+    }
+
+    @GraphComposer
+    static class IndexedByNodeIdWithMismatchedTypeSpringContextGraphComposer {
+
+        @GraphKey(strategy = AppendStrategy.class)
+        public static final String KEY_OUTPUT = OUTPUT;
+
+        @GraphNode(id = "nodeA", isStart = true, next = StateGraph.END)
+        AsyncNodeAction asyncNodeA;
+
+    }
+
+    @Test
+    @DisplayName("Spring bean injection should fallback to type when id and field name do not match")
+    void testSpringBeanInjectionWithMismatchedIdAndFieldName() {
+        runner.withUserConfiguration(TestConfiguration.class)
+                .run(context -> {
+                    GraphCompiler compiler = context.getBean(GraphCompiler.class);
+                    IndexedByFieldNameWithMismatchedTypeSpringContextGraphComposer composer = new IndexedByFieldNameWithMismatchedTypeSpringContextGraphComposer();
+                    var compiledGraph = compiler.compile(composer);
+
+                    var state = compiledGraph.invoke(Map.of()).orElseThrow();
+                    Optional<Object> output = state.value(OUTPUT);
+                    Assertions.assertThat(output).isPresent();
+
+                    Assertions.assertThat(output.get())
+                            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                            .hasSize(1)
+                            .containsExactlyInAnyOrder("asyncNodeA executed");
+                });
+    }
+
+    @GraphComposer
+    static class IndexedByFieldNameWithMismatchedTypeSpringContextGraphComposer {
+
+        @GraphKey(strategy = AppendStrategy.class)
+        public static final String KEY_OUTPUT = OUTPUT;
+
+        @GraphNode(id = "nodeB", isStart = true, next = StateGraph.END)
+        AsyncNodeAction nodeA;
+
+    }
+
     @Configuration
     public static class TestConfiguration {
 

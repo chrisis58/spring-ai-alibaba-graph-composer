@@ -34,10 +34,6 @@ public class SpringReflectiveGraphCompiler extends ReflectiveGraphCompiler imple
     @Nullable
     @Override
     protected Object resolveMissingField(Field field, String candidateName) {
-        if (applicationContext == null) {
-            return super.resolveMissingField(field, candidateName);
-        }
-
         Class<?> type = field.getType();
 
         if (StringUtils.hasText(candidateName) &&

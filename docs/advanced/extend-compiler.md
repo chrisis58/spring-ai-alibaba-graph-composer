@@ -1,8 +1,4 @@
-# 扩展 Graph Compiler
-
-::: warning 版本要求
-本章节内容适用于 `saa-graph-composer` 版本 `0.2.1` 及以上。
-:::
+# 扩展 Graph Compiler <Badge type="tip" text="0.2.1+" vertical="middle" />
 
 `ReflectiveGraphCompiler` 是本框架的核心编译器，负责将用户定义的 Composer 对象解析为可运行的 `CompiledGraph`。
 

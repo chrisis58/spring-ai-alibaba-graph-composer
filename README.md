@@ -29,7 +29,7 @@ SAA Graph Composer 是 Spring AI Alibaba Graph 的声明式编排扩展，将复
 <dependency>
     <groupId>cn.teacy.ai</groupId>
     <artifactId>saa-graph-composer</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
 </dependency>
 ```
 

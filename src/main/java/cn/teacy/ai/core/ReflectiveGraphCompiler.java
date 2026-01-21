@@ -33,7 +33,12 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         private final List<GraphOperation> operations = new ArrayList<>();
         private CompileConfig compileConfig;
 
-        private final Map<Class<? extends KeyStrategy>, KeyStrategy> strategyCache = new HashMap<>();
+        private static final ClassValue<KeyStrategy> strategyCache = new ClassValue<>() {
+            @Override
+            protected KeyStrategy computeValue(@Nonnull Class<?> type) {
+                return (KeyStrategy) BeanUtils.instantiateClass(type);
+            }
+        };
 
         protected CompileContext(Object composerInstance) {
             this.composerInstance = composerInstance;
@@ -89,7 +94,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
                 return KeyStrategy.MERGE;
             }
 
-            return strategyCache.computeIfAbsent(keyStrategyClass, BeanUtils::instantiateClass);
+            return strategyCache.get(keyStrategyClass);
         }
 
     }

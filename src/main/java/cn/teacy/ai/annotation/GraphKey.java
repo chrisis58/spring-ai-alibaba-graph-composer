@@ -27,6 +27,8 @@ public @interface GraphKey {
 
     /**
      * Description of what this key represents.
+     *
+     * @since 0.2.2
      */
     String description() default "";
 

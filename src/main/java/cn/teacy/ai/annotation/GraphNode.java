@@ -37,6 +37,8 @@ public @interface GraphNode {
 
     /**
      * Description of what this node represents.
+     *
+     * @since 0.2.2
      */
     String description() default "";
 

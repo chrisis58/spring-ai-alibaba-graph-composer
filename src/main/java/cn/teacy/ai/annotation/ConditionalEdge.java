@@ -57,11 +57,14 @@ public @interface ConditionalEdge {
      * </p>
      *
      * @see #mappings()
+     * @since 0.2.2
      */
     String[] routes() default {};
 
     /**
      * Description of what this edge represents.
+     *
+     * @since 0.2.2
      */
     String description() default "";
 

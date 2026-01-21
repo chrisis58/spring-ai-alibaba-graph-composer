@@ -13,6 +13,11 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 
+/**
+ * A GraphCompiler that integrates with Spring's ApplicationContext to resolve dependencies.
+ *
+ * @since 0.2.2
+ */
 public class SpringReflectiveGraphCompiler extends ReflectiveGraphCompiler implements ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(SpringReflectiveGraphCompiler.class);

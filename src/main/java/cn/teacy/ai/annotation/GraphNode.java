@@ -1,7 +1,5 @@
 package cn.teacy.ai.annotation;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,5 +34,10 @@ public @interface GraphNode {
      * Whether this node is the start node
      */
     boolean isStart() default false;
+
+    /**
+     * Description of what this node represents.
+     */
+    String description() default "";
 
 }

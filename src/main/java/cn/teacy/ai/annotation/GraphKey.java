@@ -26,6 +26,11 @@ public @interface GraphKey {
     Class<? extends KeyStrategy> strategy() default ReplaceStrategy.class;
 
     /**
+     * Description of what this key represents.
+     */
+    String description() default "";
+
+    /**
      * Whether this key is for internal use only. (Mark Only)
      */
     boolean internal() default false;

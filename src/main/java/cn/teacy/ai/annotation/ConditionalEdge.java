@@ -60,4 +60,9 @@ public @interface ConditionalEdge {
      */
     String[] routes() default {};
 
+    /**
+     * Description of what this edge represents.
+     */
+    String description() default "";
+
 }

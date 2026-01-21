@@ -296,4 +296,23 @@ class ReflectiveGraphCompilerErrorTest {
         final Supplier<CompileConfig> configB = () -> CompileConfig.builder().build();
     }
 
+    @Test
+    @DisplayName("Should throw exception for Conditional Edge without any routes")
+    void throwExceptionConditionalEdgeWithoutAnyRoute() {
+        ConditionalEdgeWithoutAnyRoute composer = new ConditionalEdgeWithoutAnyRoute();
+        assertThatThrownBy(() -> builder.compile(composer))
+                .isInstanceOf(GraphDefinitionException.class)
+                .hasCauseInstanceOf(IllegalArgumentException.class)
+                .satisfies(e ->
+                        assertThat(e.getCause())
+                                .hasMessageContaining("Either mappings or routes must be provided")
+                );
+    }
+
+    @GraphComposer
+    static class ConditionalEdgeWithoutAnyRoute {
+        @ConditionalEdge(source = StateGraph.START)
+        final EdgeAction edgeWithoutRoutes = (state) -> StateGraph.END;
+    }
+
 }

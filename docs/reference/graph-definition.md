@@ -52,10 +52,11 @@ public class MyGraph {
 
 定义 State (上下文) 中使用的键。建议使用 `public static final String` 常量定义，以便在代码中引用。
 
-| 属性 | 类型                             | 默认值                     | 说明        |
-| --- |--------------------------------|-------------------------|-----------|
-| `strategy` | `Class<? extends KeyStrategy>` | `ReplaceStrategy.class` | 值合并策略     |
-| `internal` | `boolean`                      | `false`                 | 标记键是否是仅内部 |
+| 属性             | 类型                             | 默认值                     | 说明       |
+|----------------|--------------------------------|-------------------------|----------|
+| `strategy`     | `Class<? extends KeyStrategy>` | `ReplaceStrategy.class` | 值合并策略    |
+| `description` <Badge type="tip" text="0.2.2+" vertical="middle" /> | `String`                       | `""`                      | 该键的含义描述  |
+| `internal`     | `boolean`                      | `false`                 | 标记键是否是仅内部 |
 
 ::: tip 💡 关于 `internal` 属性
 当前的版本中，`internal` 属性仅作为标记使用，不会影响图的编译或执行逻辑。未来版本可能会引入对内部键的特殊处理。
@@ -81,11 +82,12 @@ public static final String KEY_LOGS = "logs";
 
 定义一个执行节点。字段类型支持多种函数式接口（如 `NodeAction`, `AsyncNodeAction`）甚至另一个 `CompiledGraph`（子图）。
 
-| 属性 | 类型 | 默认值 | 说明                  |
-| --- | --- | --- |---------------------|
-| `id` | `String` | `""` | 节点 ID，若为空则使用字段名     |
-| `isStart` | `boolean` | `false` | 标记是否为起始节点，可以有多个起始节点 |
-| `next` | `String[]` | `{}` | 指定后继节点 ID |      
+| 属性             | 类型 | 默认值 | 说明              |
+|----------------| --- | -- |-----------------|
+| `id`           | `String` | `""` | 节点 ID，若为空则使用字段名 |
+| `isStart`      | `boolean` | `false` | 标记是否为起始节点，可以有多个起始节点 |
+| `next`         | `String[]` | `{}` | 指定后继节点 ID       |
+| `description` <Badge type="tip" text="0.2.2+" vertical="middle" /> | `String` | `""` | 该节点的职责或核心逻辑简述   |
 
 #### 支持的字段类型
 
@@ -135,10 +137,12 @@ final CompiledGraph nestedNode = subGraph;
 
 定义**条件流转逻辑**。该字段不代表节点，而是代表一条“智能的边”。它根据当前 State 计算出一个“指令字符串”，然后根据 `mappings` 路由到下一个节点。
 
-| 属性 | 类型 | 默认值  | 说明                                                     |
-| --- | --- |------|--------------------------------------------------------|
-| `source` | `String` | -    | 源节点 ID,表示从哪个节点出来后执行此判断                                 |
-| `mappings` | `String[]` | `{}` | 路由映射表,格式为 `{"指令1", "目标节点ID", "指令2", "目标节点ID"}` 的键值对数组 |
+| 属性                                                            | 类型 | 默认值 | 说明                                                                        |
+|---------------------------------------------------------------| --- |-----|---------------------------------------------------------------------------|
+| `source`                                                      | `String` | -   | 源节点 ID,表示从哪个节点出来后执行此判断                                                    |
+| `mappings`                                                    | `String[]` | `{}` | 路由映射表,格式为 `{"指令1", "目标节点ID", "指令2", "目标节点ID"}` 的键值对数组                     |
+| `routes` <Badge type="tip" text="0.2.2+" vertical="middle" /> | `String[]` | `{}` | 简化的直接路由列表,适用于“返回值即目标节点ID”的场景。格式为 `{"节点A", "节点B"}` 的单值数组（自动映射为 `A->A`, `B->B`） |
+| `description` <Badge type="tip" text="0.2.2+" vertical="middle" />                                                | `String` | `""`    | 分支判断的依据或路由逻辑描述                                                            |
 
 #### 支持的字段类型
 
@@ -149,7 +153,9 @@ final CompiledGraph nestedNode = subGraph;
 
 **示例：基于内容的路由**
 
-```java
+::: code-group
+
+```java [mappings]
 public static final String NODE_B = "nodeB";
 public static final String NODE_C = "nodeC";
 
@@ -169,6 +175,28 @@ final EdgeAction routingEdge = (state) -> {
 };
 
 ```
+
+```java [routes]
+public static final String NODE_B = "nodeB";
+public static final String NODE_C = "nodeC";
+
+// 逻辑：从 START 节点开始，检查 query 内容。
+// 如果包含 "b" -> 返回 "b" -> 路由到 NODE_B
+// 否则 -> 返回 "c" -> 路由到 NODE_C
+@ConditionalEdge(
+    source = StateGraph.START,
+    // 由于返回值即为目标节点ID，可以使用简化的 routes 属性
+    routes = {NODE_B, NODE_C}
+)
+final EdgeAction routingEdge = (state) -> {
+    String query = (String) state.value("query").orElse("");
+    return query.contains("b") ? NODE_B : NODE_C;
+};
+
+
+```
+
+:::
 
 ## 5. 常见模式综合示例
 

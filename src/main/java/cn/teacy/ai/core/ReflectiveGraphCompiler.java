@@ -7,6 +7,9 @@ import cn.teacy.ai.utils.UnifyUtils;
 import com.alibaba.cloud.ai.graph.*;
 import com.alibaba.cloud.ai.graph.action.*;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
+import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
+import com.alibaba.cloud.ai.graph.state.strategy.MergeStrategy;
+import com.alibaba.cloud.ai.graph.state.strategy.ReplaceStrategy;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -29,6 +32,13 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         private final Map<String, KeyStrategy> keyStrategies = new HashMap<>();
         private final List<GraphOperation> operations = new ArrayList<>();
         private CompileConfig compileConfig;
+
+        private static final ClassValue<KeyStrategy> strategyCache = new ClassValue<>() {
+            @Override
+            protected KeyStrategy computeValue(@Nonnull Class<?> type) {
+                return (KeyStrategy) BeanUtils.instantiateClass(type);
+            }
+        };
 
         protected CompileContext(Object composerInstance) {
             this.composerInstance = composerInstance;
@@ -72,6 +82,19 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
                     List.copyOf(operations),
                     compileConfig
             );
+        }
+
+        public KeyStrategy getKeyStrategy(@Nonnull Class<? extends KeyStrategy> keyStrategyClass) {
+            // caching predefined strategies
+            if (keyStrategyClass == ReplaceStrategy.class) {
+                return KeyStrategy.REPLACE;
+            } else if (keyStrategyClass == AppendStrategy.class) {
+                return KeyStrategy.APPEND;
+            } else if (keyStrategyClass == MergeStrategy.class) {
+                return KeyStrategy.MERGE;
+            }
+
+            return strategyCache.get(keyStrategyClass);
         }
 
     }
@@ -179,7 +202,7 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             throw new GraphDefinitionException("Duplicate Graph Key: " + keyName + ". Defined in field: " + field.getName());
         }
 
-        KeyStrategy strategy = BeanUtils.instantiateClass(annotation.strategy());
+        KeyStrategy strategy = context.getKeyStrategy(annotation.strategy());
 
         context.addKeyStrategy(keyName, strategy);
     }
@@ -189,6 +212,10 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
 
         ReflectionUtils.makeAccessible(field);
         Object nodeInstance = ReflectionUtils.getField(field, context.composerInstance());
+
+        if (nodeInstance == null) {
+            nodeInstance = resolveMissingField(field, nodeId);
+        }
 
         if (nodeInstance == null) {
             throw new IllegalStateException("GraphNode field '" + field.getName() + "' is null. Please initialize it.");
@@ -227,11 +254,15 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
     }
 
     protected void handleConditionalEdge(CompileContext context, Field field, ConditionalEdge annotation) {
-        Map<String, String> routeMap = parseMappings(annotation.mappings(), field.getName());
+        Map<String, String> routeMap = parseMappings(annotation.mappings(), annotation.routes(), field.getName());
         String sourceNodeId = annotation.source();
 
         ReflectionUtils.makeAccessible(field);
         Object fieldVal = ReflectionUtils.getField(field, context.composerInstance());
+
+        if (fieldVal == null) {
+            fieldVal = resolveMissingField(field, null);
+        }
 
         if (fieldVal == null) {
             throw new GraphDefinitionException("Conditional Edge field '"
@@ -261,6 +292,10 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
         Object value = ReflectionUtils.getField(field, context.composerInstance());
 
         if (value == null) {
+            value = resolveMissingField(field, null);
+        }
+
+        if (value == null) {
             throw new GraphDefinitionException("@GraphCompileConfig field '" + field.getName() + "' must not be null.");
         }
 
@@ -279,11 +314,17 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
 
     }
 
-    private Map<String, String> parseMappings(String[] mappings, String fieldName) {
+    private Map<String, String> parseMappings(String[] mappings, String[] routes, String fieldName) {
         if (mappings.length % 2 != 0) {
             throw new IllegalArgumentException("Mappings must be pairs in field: " + fieldName);
         }
+        if (mappings.length == 0 && routes.length == 0) {
+            throw new IllegalArgumentException("Either mappings or routes must be provided in field: " + fieldName);
+        }
         Map<String, String> map = new HashMap<>();
+        for (String route : routes) {
+            map.put(route, route);
+        }
         for (int i = 0; i < mappings.length; i += 2) {
             map.put(mappings[i], mappings[i + 1]);
         }
@@ -306,6 +347,17 @@ public class ReflectiveGraphCompiler implements GraphCompiler {
             return;
         }
         log.debug("Field '{}' is not annotated with recognized graph annotations.", field.getName());
+    }
+
+    /**
+     * Extension point for handling null fields annotated with graph-related annotations.
+     *
+     * @param field the field that is null
+     * @return an object to use in place of the null field, or null to indicate no substitution
+     */
+    @Nullable
+    protected Object resolveMissingField(Field field, @Nullable String candidateName) {
+        return null;
     }
 
 }

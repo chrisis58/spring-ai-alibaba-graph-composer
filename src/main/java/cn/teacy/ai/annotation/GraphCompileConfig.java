@@ -18,4 +18,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphCompileConfig {
 
+    /**
+     * Description of what this config represents.
+     *
+     * @since 0.2.2
+     */
+    String description() default "";
+
 }

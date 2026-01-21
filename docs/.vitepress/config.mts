@@ -26,6 +26,7 @@ export default defineConfig({
         items: [
           { text: '全局配置', link: '/reference/configuration' },
           { text: '图定义', link: '/reference/graph-definition' },
+          { text: 'Spring 集成', link: '/reference/spring-integration' }
         ]
       },
       {

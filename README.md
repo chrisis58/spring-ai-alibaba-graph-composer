@@ -1,6 +1,6 @@
 # SAA Graph Composer
 
-![Java Support](https://img.shields.io/badge/Java-17%2B-b07219?logo=openjdk&logoColor=white) [![Maven Central](https://img.shields.io/maven-central/v/cn.teacy.ai/saa-graph-composer.svg?label=Maven%20Central&logo=apachemaven)](https://central.sonatype.com/artifact/cn.teacy.ai/saa-graph-composer) [![codecov](https://codecov.io/github/chrisis58/saa-graph-composer/graph/badge.svg?token=7NINYO6037)](https://codecov.io/github/chrisis58/saa-graph-composer) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![Java Support](https://img.shields.io/badge/Java-17%2B-b07219?logo=openjdk&logoColor=white) [![Maven Central](https://img.shields.io/maven-central/v/cn.teacy.ai/saa-graph-composer.svg?label=Maven%20Central&logo=apachemaven)](https://central.sonatype.com/artifact/cn.teacy.ai/saa-graph-composer) [![codecov](https://codecov.io/github/chrisis58/saa-graph-composer/graph/badge.svg?token=7NINYO6037)](https://codecov.io/github/chrisis58/saa-graph-composer) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE) [![Plugin](https://img.shields.io/jetbrains/plugin/v/29871.svg?logo=intellij-idea)](https://plugins.jetbrains.com/plugin/29871)
 
 SAA Graph Composer 是 Spring AI Alibaba Graph 的声明式编排扩展，将复杂的底层流式构建转化为优雅的注解驱动开发。
 
@@ -69,6 +69,16 @@ public CompiledGraph helloGraph() {
     return builder.compile();
 }
 ```
+
+通过 [Intellij IDEA](https://www.jetbrains.com/idea/) 插件，你可以实时预览你的图编排：
+
+![插件预览演示](./assets/plugin-showcase.gif)
+
+<div align="center">
+  <a href="https://plugins.jetbrains.com/plugin/29871-saa-graph-composer">
+    <img src="https://img.shields.io/badge/Get%20from-Marketplace-black?logo=jetbrains&style=for-the-badge" alt="Get from Marketplace">
+  </a>
+</div>
 
 ## 🤝 与 Spring AI Alibaba 的关系
 

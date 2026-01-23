@@ -75,6 +75,9 @@ public CompiledGraph helloGraph() {
 ![插件预览演示](./assets/plugin-showcase.gif)
 
 <div align="center">
+在 IDEA 插件市场搜索 <code>SAA Graph Composer</code> 进行安装
+<br/>
+<br/>
   <a href="https://plugins.jetbrains.com/plugin/29871-saa-graph-composer">
     <img src="https://img.shields.io/badge/Get%20from-Marketplace-black?logo=jetbrains&style=for-the-badge" alt="Get from Marketplace">
   </a>

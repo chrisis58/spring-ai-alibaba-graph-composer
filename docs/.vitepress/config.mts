@@ -4,12 +4,12 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "SAA Graph Composer",
   description: "Declarative AI Agent Compose Extension for Spring AI Alibaba Graph",
-  base: '/saa-graph-composer/',
+  base: '/spring-ai-alibaba-graph-composer/',
   themeConfig: {
     nav: [
       { text: '指南', link: '/guide/getting-started' },
       { text: 'API 参考', link: '/reference/annotations' },
-      { text: 'GitHub', link: 'https://github.com/chrisis58/saa-graph-composer' }
+      { text: 'GitHub', link: 'https://github.com/chrisis58/spring-ai-alibaba-graph-composer' }
     ],
 
     sidebar: [
@@ -48,12 +48,12 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/chrisis58/saa-graph-composer/edit/main/docs/:path',
+      pattern: 'https://github.com/chrisis58/spring-ai-alibaba-graph-composer/edit/main/docs/:path',
       text: '在 GitHub 上编辑此页'
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/chrisis58/saa-graph-composer' }
+      { icon: 'github', link: 'https://github.com/chrisis58/spring-ai-alibaba-graph-composer' }
     ],
 
     footer: {

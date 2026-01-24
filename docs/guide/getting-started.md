@@ -2,7 +2,10 @@
 
 只需几分钟，你就能将第一个声明式 AI Agent 工作流运行起来。
 
-本指南将带你构建一个最基础的 **"Hello World"** 图。为了演示 **"节点即适配器 (Node as Adaptor)"** 的核心理念，我们将模拟一个简单的业务场景：接收用户名字，调用 Service 处理，然后返回问候语。
+本指南将带你构建一个最基础的 "Hello World" ，将展示两种推荐的实现模式：
+
+1. **Adaptor 模式**：在 Composer 中直接编写 Lambda 表达式作为胶水代码，适合简单的参数转换。
+2. **Bean 引用模式** <Badge type="tip" text="0.2.2+" vertical="middle" />：将节点逻辑完全剥离为独立的 Spring Bean，Composer 仅负责引用，适合复杂的业务逻辑。
 
 ## 1. 环境准备
 
@@ -40,13 +43,11 @@ implementation 'cn.teacy.ai:saa-graph-composer:0.2.2'
 
 ## 3. 编写业务逻辑 (Service)
 
-我们倡导 **关注点分离**。请不要在图编排层直接编写业务逻辑，而是应该定义一个标准的 Spring Service。
+我们倡导 **关注点分离**。请根据你的场景选择以下一种方式定义业务逻辑。
 
-```java
-package com.example.service;
+:::code-group
 
-import org.springframework.stereotype.Service;
-
+```java [Adaptor]
 @Service
 public class GreetingService {
 
@@ -58,52 +59,52 @@ public class GreetingService {
 
 ```
 
+```java [Spring Bean]
+@Component
+public class GreetingNode implements AsyncNodeAction {
+    
+    // 这里使用与 Composer 中相同的常量，确保一致性
+    private static final String KEY_INPUT = HelloWorldGraphComposer.KEY_INPUT;
+    private static final String KEY_OUTPUT = HelloWorldGraphComposer.KEY_OUTPUT;
+
+    public String generateGreeting(String name) {
+        // 模拟一个耗时的 AI 或业务操作
+        return "Hello, " + name + "! Welcome to SAA Graph Composer.";
+    }
+
+    @Override
+    public CompletableFuture<Map<String, Object>> apply(OverAllState state) {
+        String name = (String) state.value(KEY_INPUT).orElse("World");
+        String result = this.generateGreeting(name);
+        return CompletableFuture.completedFuture(Map.of(KEY_OUTPUT, result));
+    }
+}
+```
+:::
+
 ## 4. 编写图编排 (Composer)
 
-现在，我们使用 **声明式注解** 来组装这个图。
+现在，我们使用 **声明式注解** 来组装这个图。 现在 `HelloWorldGraphComposer` 类充当了 **路由层** 的角色。
 
-注意看，`HelloWorldGraphComposer` 类充当了 **路由层** 的角色。它注入了 `GreetingService`，并将节点定义为服务的适配器。
+:::code-group
 
-```java
-package com.example.graph;
-
-import cn.teacy.ai.annotation.GraphComposer;
-import cn.teacy.ai.annotation.GraphKey;
-import cn.teacy.ai.annotation.GraphNode;
-import com.alibaba.cloud.ai.graph.StateGraph;
-import com.alibaba.cloud.ai.graph.action.AsyncNodeAction;
-import com.example.service.GreetingService;
-
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
-// 1. 定义目标 Bean 名称，方便在其他地方注入。如果缺省，本例的目标名称将为 "helloWorldGraph"。
-@GraphComposer(targetBeanName = "hello_world_graph")
+```java [Adaptor]
+// 通过 targetBeanName 定义目标 Bean 名称，方便在其他地方注入。
+@GraphComposer(targetBeanName = "helloWorldGraph")
 public class HelloWorldGraphComposer {
 
-    // === 常量定义区 ===
-
-    @GraphKey // 标记这是状态中的 Key
+    // 定义图状态的键
+    @GraphKey
     public static final String KEY_INPUT = "name";
 
     @GraphKey
     public static final String KEY_OUTPUT = "result";
 
-    private static final String NODE_SAY_HELLO = "say_hello";
+    // 定义节点 ID 常量
+    private static final String NODE_GREETING = "greetingNode";
 
-    // === 依赖注入区 ===
-
-    private final GreetingService greetingService;
-
-    // 构造器注入 Service
-    public HelloWorldGraphComposer(GreetingService greetingService) {
-        this.greetingService = greetingService;
-    }
-
-    // === 图结构定义区 ===
-
-    // 定义节点：接收状态 -> 调用 Service -> 返回结果
-    @GraphNode(id = NODE_SAY_HELLO, isStart = true, next = StateGraph.END)
+    // 使用 Adaptor 模式，在 Composer 内部编写节点逻辑
+    @GraphNode(id = NODE_GREETING, isStart = true, next = StateGraph.END)
     public AsyncNodeAction sayHello = state -> {
         // 使用常量提取参数
         String name = (String) state.value(KEY_INPUT).orElse("World");
@@ -114,15 +115,46 @@ public class HelloWorldGraphComposer {
         // 返回异步结果
         return CompletableFuture.completedFuture(Map.of(KEY_OUTPUT, result));
     };
+
+    // 处理依赖注入
+    private final GreetingService greetingService;
+
+    public HelloWorldGraphComposer(GreetingService greetingService) {
+        this.greetingService = greetingService;
+    }
 }
 
 ```
 
-::: tip ✨ 最佳实践
-在这个例子中，`sayHello` 节点仅仅包含几行**胶水代码**。这正是我们推荐的 **Node as Adaptor** 模式——保持编排层的轻量与纯粹。
+```java [Spring Bean]
+// 通过 targetBeanName 定义目标 Bean 名称，方便在其他地方注入。
+@GraphComposer(targetBeanName = "helloWorldGraph")
+public class HelloWorldGraphComposer {
+
+    // 定义图状态的键
+    @GraphKey
+    public static final String KEY_INPUT = "name";
+
+    @GraphKey
+    public static final String KEY_OUTPUT = "result";
+
+    // 定义节点 ID 常量
+    private static final String NODE_GREETING = "greetingNode";
+
+    // 这里不初始化字段，框架会自动使用 GreetingNode Bean
+    @GraphNode(id = NODE_GREETING, isStart = true, next = StateGraph.END)
+    private GreetingNode greetingNode;
+
+}
+```
+:::
+
+::: tip ✨ 最佳实践：如何选择？
+- **Adaptor Mode**：适合简单的逻辑组装。代码紧凑，直观。
+- **Bean Reference**：适合复杂的业务场景。利用 Spring 容器管理节点生命周期，实现编排与执行的彻底解耦。
 :::
 ::: tip ✨ 最佳实践
-虽然直接使用字符串（如 "say_hello"）也能工作，但我们强烈建议定义 static final 常量。这样做不仅能避免拼写错误，还能让 Composer 类成为一份自解释的图状态文档。 
+虽然直接使用字符串（如 "greetingNode"）也能工作，但我们强烈建议定义 static final 常量。这样做不仅能避免拼写错误，还能让 Composer 类成为一份自解释的图状态文档。 
 :::
 
 ## 5. 启用配置
@@ -130,12 +162,6 @@ public class HelloWorldGraphComposer {
 在你的 Spring Boot 启动类或配置类上添加 `@EnableGraphComposer` 注解，以启动图扫描与自动注册功能。
 
 ```java
-package com.example;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import cn.teacy.ai.annotation.EnableGraphComposer;
-
 @SpringBootApplication
 @EnableGraphComposer // 添加注解
 public class MyApplication {
@@ -155,23 +181,13 @@ public class MyApplication {
 `saa-graph-composer` 会自动扫描 `@GraphComposer` 注解，并将编译好的图注册为 Spring Bean。你可以直接注入并运行它。
 
 ```java
-package com.example;
-
-import com.alibaba.cloud.ai.graph.CompiledGraph;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Map;
-
 @SpringBootTest
 public class GraphTest {
 
     @Autowired
     // 注入时使用注解中定义的 ID
     // 由于 CompiledGraph 实例是动态生成的，所以 IDE 可能在此处会提示找不到 Bean，实际运行时不会有问题。
-    @Qualifier("hello_world_graph")
+    @Qualifier("helloWorldGraph")
     private CompiledGraph graph;
 
     @Test
@@ -180,10 +196,10 @@ public class GraphTest {
         Map<String, Object> input = Map.of("name", "Developer");
 
         // 2. 执行图
-        Map<String, Object> result = graph.invoke(input);
+        OverAllState state = graph.invoke(input).orElseThrow();
 
         // 3. 验证结果
-        System.out.println("输出结果: " + result.get("result"));
+        System.out.println("输出结果: " + state.value("result").orElse("无结果"));
         // Output: Hello, Developer! Welcome to SAA Graph Composer.
     }
 }
@@ -194,6 +210,6 @@ public class GraphTest {
 
 恭喜！你已经成功运行了第一个声明式 Graph。
 
-但这只是开始，接下来你可以探索更强大的功能：
+但这只是开始，接下来你可以探索更多功能：
 
 * **[注解详解](../reference/configuration)**: 查阅 `@GraphComposer` 和 `@GraphNode` 等的所有参数。

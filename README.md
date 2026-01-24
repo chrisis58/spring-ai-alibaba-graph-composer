@@ -2,7 +2,7 @@
 
 ![Java Support](https://img.shields.io/badge/Java-17%2B-b07219?logo=openjdk&logoColor=white) [![Maven Central](https://img.shields.io/maven-central/v/cn.teacy.ai/saa-graph-composer.svg?label=Maven%20Central&logo=apachemaven)](https://central.sonatype.com/artifact/cn.teacy.ai/saa-graph-composer) [![codecov](https://codecov.io/github/chrisis58/saa-graph-composer/graph/badge.svg?token=7NINYO6037)](https://codecov.io/github/chrisis58/saa-graph-composer) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE) [![Plugin](https://img.shields.io/jetbrains/plugin/v/29871.svg?logo=intellij-idea)](https://plugins.jetbrains.com/plugin/29871)
 
-SAA Graph Composer 是 Spring AI Alibaba Graph 的声明式编排扩展，将复杂的底层流式构建转化为优雅的注解驱动开发。
+SAA (Spring AI Alibaba) Graph Composer 是 Spring AI Alibaba Graph 的声明式编排扩展，将复杂的底层流式构建转化为优雅的注解驱动开发。
 
 [📚 在线文档](https://chrisis58.github.io/saa-graph-composer/) | [🚀 快速开始](https://chrisis58.github.io/saa-graph-composer/guide/getting-started.html)
 

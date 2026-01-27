@@ -103,24 +103,24 @@ public class HelloWorldGraphComposer {
     // 定义节点 ID 常量
     private static final String NODE_GREETING = "greetingNode";
 
-    // 使用 Adaptor 模式，在 Composer 内部编写节点逻辑
     @GraphNode(id = NODE_GREETING, isStart = true, next = StateGraph.END)
-    public AsyncNodeAction sayHello = state -> {
-        // 使用常量提取参数
-        String name = (String) state.value(KEY_INPUT).orElse("World");
+    private final NodeAction greetingNode;
 
-        // 委托 Service 执行业务
-        String result = greetingService.generateGreeting(name);
+    // 这里使用 Adaptor 模式，直接在 Composer 中编写节点逻辑
+    public GreetingGraphWithAdaptorNodeComposer(
+            GreetingService greetingService
+    ) {
+        // 接收注入的服务，完成节点逻辑
+        this.greetingNode = (state) -> {
+            // 使用常量提取参数
+            String someone = state.value(KEY_INPUT, "world");
 
-        // 返回异步结果
-        return CompletableFuture.completedFuture(Map.of(KEY_OUTPUT, result));
-    };
+            // 委托 Service 执行业务
+            String greet = greetingService.greet(someone);
 
-    // 处理依赖注入
-    private final GreetingService greetingService;
-
-    public HelloWorldGraphComposer(GreetingService greetingService) {
-        this.greetingService = greetingService;
+            // 返回结果
+            return Map.of(KEY_OUTPUT, greet);
+        };
     }
 }
 

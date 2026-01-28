@@ -5,10 +5,14 @@
     <groupId>cn.teacy.ai</groupId>
     <artifactId>saa-graph-composer</artifactId>
     <version>${revision}</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>saa-graph-composer</name>
     <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
+    <modules>
+        <module>saa-graph-composer-core</module>
+        <module>saa-graph-composer-spring-boot-starter</module>
+    </modules>
 
     <description>
         Declarative AI Agent Compose Extension for Spring AI Alibaba (SAA) Graph.

@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.teacy.ai</groupId>
+        <artifactId>saa-graph-composer</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>saa-graph-composer-core</artifactId>
+    <packaging>jar</packaging>
+
+    <description>
+        Core module for SAA Graph Composer.
+    </description>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>chrisis58</id>
+            <name>chris zheng</name>
+            <email>chrisis58@outlook.com</email>
+            <url>https://github.com/chrisis58</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/chrisis58/spring-ai-alibaba-graph-composer.git</connection>
+        <developerConnection>scm:git:git@github.com:chrisis58/spring-ai-alibaba-graph-composer.git</developerConnection>
+        <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-graph-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+</project>

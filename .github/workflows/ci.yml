@@ -42,4 +42,5 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: "**/target/site/jacoco/jacoco.xml"
+          handle_no_reports_found: true
           fail_ci_if_error: true

@@ -15,10 +15,12 @@ public class ExamplesMainApplication {
 
         try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ExampleConfig.class)) {
 
+            // #region snippet
             CompiledGraph graph = context.getBean(CompiledGraph.class);
             graph.invoke(Map.of(KEY_INPUT, "alice")).ifPresent(it ->
                     System.out.println(it.value(KEY_OUTPUT, "world"))
             );
+            // #endregion snippet
 
             context.registerShutdownHook();
         } catch (Exception e) {

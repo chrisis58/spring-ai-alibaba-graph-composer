@@ -32,6 +32,7 @@ export default defineConfig({
       {
         text: '进阶用法',
         items: [
+          { text: '核心库集成', link: '/advanced/core-library' },
           { text: '手动与动态编译', link: '/advanced/dynamic-compilation' },
           { text: '生命周期钩子', link: '/advanced/hooks-lifecycle' },
           { text: '扩展 Graph Compiler', link: '/advanced/extend-compiler' }

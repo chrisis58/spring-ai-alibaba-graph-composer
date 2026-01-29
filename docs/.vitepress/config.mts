@@ -18,7 +18,7 @@ export default defineConfig({
         items: [
           { text: '简介', link: '/guide/introduction' },
           { text: '快速开始', link: '/guide/getting-started' },
-          { text: '版本兼容性', link: '/guide/installation' }
+          { text: '版本兼容性', link: '/guide/compatibility' }
         ]
       },
       {

@@ -5,22 +5,14 @@
     <groupId>cn.teacy.ai</groupId>
     <artifactId>saa-graph-composer-examples</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>saa-graph-composer-examples</name>
     <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>9</source>
-                    <target>9</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+
+    <modules>
+        <module>saa-graph-composer-examples-boot</module>
+    </modules>
 
     <description>
         Examples for SAA Graph Composer.
@@ -55,7 +47,7 @@
 
         <spring-ai-alibaba.version>1.1.0.0</spring-ai-alibaba.version>
         <spring-boot.version>3.4.1</spring-boot.version>
-        <saa-graph-composer.version>0.2.2</saa-graph-composer.version>
+        <saa-graph-composer.version>0.3.0</saa-graph-composer.version>
     </properties>
 
     <dependencyManagement>
@@ -75,33 +67,33 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>cn.teacy.ai</groupId>
+                <artifactId>saa-graph-composer</artifactId>
+                <version>${saa-graph-composer.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.teacy.ai</groupId>
+                <artifactId>saa-graph-composer-spring-boot-starter</artifactId>
+                <version>${saa-graph-composer.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-
-        <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-graph-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>cn.teacy.ai</groupId>
-            <artifactId>saa-graph-composer</artifactId>
-            <version>${saa-graph-composer.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-        </dependency>
-
-    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

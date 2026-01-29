@@ -2,6 +2,7 @@ package cn.teacy.ai.examples.service;
 
 import org.springframework.stereotype.Service;
 
+// #region snippet
 @Service
 public class GreetingService {
 
@@ -10,3 +11,4 @@ public class GreetingService {
     }
 
 }
+// #endregion snippet

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+// #region snippet
 @Component
 public class GreetingNode implements NodeAction {
 
@@ -23,10 +24,9 @@ public class GreetingNode implements NodeAction {
     @Override
     public Map<String, Object> apply(OverAllState state) {
         String someone = state.value(KEY_INPUT, "world");
-
         String greet = greetingService.greet(someone);
-
         return Map.of(KEY_OUTPUT, greet);
     }
 
 }
+// #region snippet

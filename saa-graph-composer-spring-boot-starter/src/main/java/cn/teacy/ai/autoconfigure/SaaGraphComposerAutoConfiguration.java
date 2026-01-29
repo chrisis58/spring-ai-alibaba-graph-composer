@@ -2,6 +2,7 @@ package cn.teacy.ai.autoconfigure;
 
 import cn.teacy.ai.core.GraphCompiler;
 import cn.teacy.ai.core.SpringReflectiveGraphCompiler;
+import cn.teacy.ai.support.GraphComposerMarker;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,6 +16,7 @@ import static cn.teacy.ai.constants.ComposerConfigConstants.GRAPH_COMPILER_BEAN_
 
 @AutoConfiguration
 @EnableConfigurationProperties(SaaGraphComposerProperties.class)
+@ConditionalOnMissingBean(GraphComposerMarker.class)
 @ConditionalOnProperty(prefix = "spring.ai.graph-composer", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SaaGraphComposerAutoConfiguration {
 

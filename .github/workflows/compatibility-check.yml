@@ -8,6 +8,9 @@ on:
       - completed
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   compatibility-test:
     name: SpringBoot ${{ matrix.boot }} + SAA ${{ matrix.saa }}
@@ -70,11 +73,18 @@ jobs:
           retention-days: 1
 
   summary:
-    name: Summarize Results
+    name: Sync Metadata
     needs: [ compatibility-test ]
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
       - name: Download All Results
         uses: actions/download-artifact@v4
         with:
@@ -82,20 +92,33 @@ jobs:
           pattern: results-*
           merge-multiple: true
 
-      - name: Generate Final Summary
+      - name: Generate Compatibility JSON
         run: |
-          echo "### 📊 Compatibility Matrix Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | Spring Boot | Spring AI Alibaba |" >> $GITHUB_STEP_SUMMARY
-          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          mkdir -p metadata
+          echo "[" > metadata/compatibility.json
           
+          FIRST=true
           for file in all-results/result-*.txt; do
+            if [ "$FIRST" = true ]; then FIRST=false; else echo "," >> metadata/compatibility.json; fi
+          
             STATUS=$(cut -d'|' -f1 < "$file")
             BOOT=$(cut -d'|' -f2 < "$file")
             SAA=$(cut -d'|' -f3 < "$file")
           
-            if [ "$STATUS" == "success" ]; then
-              echo "| ✅ Pass | $BOOT | $SAA |" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "| ❌ Fail | $BOOT | $SAA |" >> $GITHUB_STEP_SUMMARY
-            fi
+            echo "  { \"status\": \"$STATUS\", \"boot\": \"$BOOT\", \"saa\": \"$SAA\" }" >> metadata/compatibility.json
           done
+          
+          echo "]" >> metadata/compatibility.json
+
+      - name: Push to Metadata
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet metadata/compatibility.json; then
+            echo "No changes detected in compatibility matrix."
+          else
+            git add metadata/compatibility.json
+            git commit -m "data: sync compatibility metadata [skip ci]"
+            git push origin main
+          fi

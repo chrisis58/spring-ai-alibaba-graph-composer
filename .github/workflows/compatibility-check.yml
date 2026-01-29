@@ -77,7 +77,7 @@ jobs:
   summary:
     name: Sync Metadata
     needs: [ compatibility-test ]
-    if: success()
+    if: always() && needs.compatibility-test.result != 'skipped'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -117,10 +117,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          if git diff --quiet metadata/compatibility.json; then
+          git add metadata/compatibility.json
+
+          if git diff --cached --quiet; then
             echo "No changes detected in compatibility matrix."
           else
-            git add metadata/compatibility.json
             git commit -m "data: sync compatibility metadata [skip ci]"
             git push origin main
           fi

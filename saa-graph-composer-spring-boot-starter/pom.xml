@@ -9,6 +9,8 @@
 
     <artifactId>saa-graph-composer-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
+    <name>saa-graph-composer-spring-boot-starter</name>
+    <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
 
     <description>
         Spring Boot Starter for SAA Graph Composer.

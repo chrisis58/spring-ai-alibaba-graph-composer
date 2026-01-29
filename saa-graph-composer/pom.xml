@@ -10,6 +10,7 @@
     <artifactId>saa-graph-composer</artifactId>
     <packaging>jar</packaging>
     <name>saa-graph-composer</name>
+    <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
 
     <description>
         Declarative AI Agent Compose Extension for Spring AI Alibaba (SAA) Graph.

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>cn.teacy.ai</groupId>
-        <artifactId>saa-graph-composer</artifactId>
+        <artifactId>spring-ai-alibaba-graph-composer</artifactId>
         <version>${revision}</version>
     </parent>
 
@@ -55,7 +55,7 @@
 
         <dependency>
             <groupId>cn.teacy.ai</groupId>
-            <artifactId>saa-graph-composer-core</artifactId>
+            <artifactId>saa-graph-composer</artifactId>
             <version>${revision}</version>
         </dependency>
 

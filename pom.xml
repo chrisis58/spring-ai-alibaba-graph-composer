@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.teacy.ai</groupId>
-    <artifactId>saa-graph-composer</artifactId>
+    <artifactId>spring-ai-alibaba-graph-composer</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
-    <name>saa-graph-composer</name>
+    <name>spring-ai-alibaba-graph-composer</name>
     <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
     <modules>
-        <module>saa-graph-composer-core</module>
+        <module>saa-graph-composer</module>
         <module>saa-graph-composer-spring-boot-starter</module>
     </modules>
 

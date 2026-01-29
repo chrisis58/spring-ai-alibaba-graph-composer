@@ -21,133 +21,65 @@
 
 ## 2. 引入依赖
 
-将 `saa-graph-composer` 添加到你的项目中。
+从 **0.3.0** 版本开始，我们推荐使用 Spring Boot Starter 来快速接入。
 
 ::: code-group
 
 ```xml [Maven]
 <dependency>
     <groupId>cn.teacy.ai</groupId>
-    <artifactId>saa-graph-composer</artifactId>
-    <version>0.2.2</version>
+    <artifactId>saa-graph-composer-spring-boot-starter</artifactId>
+    <version>0.3.0</version>
 </dependency>
 
 ```
 
 ```groovy [Gradle]
-implementation 'cn.teacy.ai:saa-graph-composer:0.2.2'
+implementation 'cn.teacy.ai:saa-graph-composer-spring-boot-starter:0.3.0'
 
 ```
 
+:::
+
+::: tip 💡 非 Spring Boot 项目？
+如果你正在使用纯 Spring Framework 或需要手动集成核心库，请参阅 [核心库集成](../advanced/core-library.md)。
 :::
 
 ## 3. 编写业务逻辑 (Service)
 
 我们倡导 **关注点分离**。请根据你的场景选择以下一种方式定义业务逻辑。
 
-:::code-group
+<ExampleTabs>
+<ExampleWrapper path="saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/service/GreetingService.java" label="Adaptor">
 
-```java [Adaptor]
-@Service
-public class GreetingService {
+<<< @/../examples/saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/service/GreetingService.java#snippet{java}
 
-    public String generateGreeting(String name) {
-        // 模拟一个耗时的 AI 或业务操作
-        return "Hello, " + name + "! Welcome to SAA Graph Composer.";
-    }
-}
+</ExampleWrapper>
+<ExampleWrapper path="saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/agent/node/GreetingNode.java" label="Bean Ref">
 
-```
+<<< @/../examples/saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/agent/node/GreetingNode.java#snippet{java}
 
-```java [Spring Bean]
-@Component
-public class GreetingNode implements AsyncNodeAction {
-    
-    // 这里使用与 Composer 中相同的常量，确保一致性
-    private static final String KEY_INPUT = HelloWorldGraphComposer.KEY_INPUT;
-    private static final String KEY_OUTPUT = HelloWorldGraphComposer.KEY_OUTPUT;
+</ExampleWrapper>
 
-    public String generateGreeting(String name) {
-        // 模拟一个耗时的 AI 或业务操作
-        return "Hello, " + name + "! Welcome to SAA Graph Composer.";
-    }
-
-    @Override
-    public CompletableFuture<Map<String, Object>> apply(OverAllState state) {
-        String name = (String) state.value(KEY_INPUT).orElse("World");
-        String result = this.generateGreeting(name);
-        return CompletableFuture.completedFuture(Map.of(KEY_OUTPUT, result));
-    }
-}
-```
-:::
+</ExampleTabs>
 
 ## 4. 编写图编排 (Composer)
 
 现在，我们使用 **声明式注解** 来组装这个图。 现在 `HelloWorldGraphComposer` 类充当了 **路由层** 的角色。
 
-:::code-group
+<ExampleTabs>
+<ExampleWrapper path="saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/agent/graph/GreetingGraphWithAdaptorNodeComposer.java" label="Adaptor">
 
-```java [Adaptor]
-// 通过 targetBeanName 定义目标 Bean 名称，方便在其他地方注入。
-@GraphComposer(targetBeanName = "helloWorldGraph")
-public class HelloWorldGraphComposer {
+<<< @/../examples/saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/agent/graph/GreetingGraphWithAdaptorNodeComposer.java#snippet{java}
 
-    // 定义图状态的键
-    @GraphKey
-    public static final String KEY_INPUT = "name";
+</ExampleWrapper>
+<ExampleWrapper path="saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/agent/graph/GreetingGraphWithBeanNodeComposer.java" label="Bean Ref">
 
-    @GraphKey
-    public static final String KEY_OUTPUT = "result";
+<<< @/../examples/saa-graph-composer-examples-boot/src/main/java/cn/teacy/ai/examples/agent/graph/GreetingGraphWithBeanNodeComposer.java#snippet{java}
 
-    // 定义节点 ID 常量
-    private static final String NODE_GREETING = "greetingNode";
+</ExampleWrapper>
 
-    @GraphNode(id = NODE_GREETING, isStart = true, next = StateGraph.END)
-    private final NodeAction greetingNode;
-
-    // 这里使用 Adaptor 模式，直接在 Composer 中编写节点逻辑
-    public GreetingGraphWithAdaptorNodeComposer(
-            GreetingService greetingService
-    ) {
-        // 接收注入的服务，完成节点逻辑
-        this.greetingNode = (state) -> {
-            // 使用常量提取参数
-            String someone = state.value(KEY_INPUT, "world");
-
-            // 委托 Service 执行业务
-            String greet = greetingService.greet(someone);
-
-            // 返回结果
-            return Map.of(KEY_OUTPUT, greet);
-        };
-    }
-}
-
-```
-
-```java [Spring Bean]
-// 通过 targetBeanName 定义目标 Bean 名称，方便在其他地方注入。
-@GraphComposer(targetBeanName = "helloWorldGraph")
-public class HelloWorldGraphComposer {
-
-    // 定义图状态的键
-    @GraphKey
-    public static final String KEY_INPUT = "name";
-
-    @GraphKey
-    public static final String KEY_OUTPUT = "result";
-
-    // 定义节点 ID 常量
-    private static final String NODE_GREETING = "greetingNode";
-
-    // 这里不初始化字段，框架会自动使用 GreetingNode Bean
-    @GraphNode(id = NODE_GREETING, isStart = true, next = StateGraph.END)
-    private GreetingNode greetingNode;
-
-}
-```
-:::
+</ExampleTabs>
 
 ::: tip ✨ 最佳实践：如何选择？
 - **Adaptor Mode**：适合简单的逻辑组装。代码紧凑，直观。
@@ -157,54 +89,22 @@ public class HelloWorldGraphComposer {
 虽然直接使用字符串（如 "greetingNode"）也能工作，但我们强烈建议定义 static final 常量。这样做不仅能避免拼写错误，还能让 Composer 类成为一份自解释的图状态文档。 
 :::
 
-## 5. 启用配置
-
-在你的 Spring Boot 启动类或配置类上添加 `@EnableGraphComposer` 注解，以启动图扫描与自动注册功能。
-
-```java
-@SpringBootApplication
-@EnableGraphComposer // 添加注解
-public class MyApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(MyApplication.class, args);
-    }
-}
-
-```
-
-::: tip 🔍 扫描范围
-默认情况下，框架会扫描启动类所在的包及其子包下的 `@GraphComposer` 组件。如果你的组件定义在其他包路径下，请确保它们能被 Spring 上下文扫描到。 
-:::
-
-## 6. 运行与测试
+## 5. 运行与测试
 
 `saa-graph-composer` 会自动扫描 `@GraphComposer` 注解，并将编译好的图注册为 Spring Bean。你可以直接注入并运行它。
 
-```java
-@SpringBootTest
-public class GraphTest {
+<ExampleTabs>
+<ExampleWrapper path="saa-graph-composer-examples-boot/src/test/java/cn/teacy/ai/examples/GreetingGraphDemoTest.java" label="Adaptor">
 
-    @Autowired
-    // 注入时使用注解中定义的 ID
-    // 由于 CompiledGraph 实例是动态生成的，所以 IDE 可能在此处会提示找不到 Bean，实际运行时不会有问题。
-    @Qualifier("helloWorldGraph")
-    private CompiledGraph graph;
+<<< @/../examples/saa-graph-composer-examples-boot/src/test/java/cn/teacy/ai/examples/GreetingGraphDemoTest.java#adaptor{java}
 
-    @Test
-    public void testRun() throws Exception {
-        // 1. 准备初始输入
-        Map<String, Object> input = Map.of("name", "Developer");
+</ExampleWrapper>
+<ExampleWrapper path="saa-graph-composer-examples-boot/src/test/java/cn/teacy/ai/examples/GreetingGraphDemoTest.java" label="Bean Ref">
 
-        // 2. 执行图
-        OverAllState state = graph.invoke(input).orElseThrow();
+<<< @/../examples/saa-graph-composer-examples-boot/src/test/java/cn/teacy/ai/examples/GreetingGraphDemoTest.java#beanRef{java}
 
-        // 3. 验证结果
-        System.out.println("输出结果: " + state.value("result").orElse("无结果"));
-        // Output: Hello, Developer! Welcome to SAA Graph Composer.
-    }
-}
-
-```
+</ExampleWrapper>
+</ExampleTabs>
 
 ## 下一步
 

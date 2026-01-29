@@ -12,6 +12,7 @@
 
     <modules>
         <module>saa-graph-composer-examples-boot</module>
+        <module>saa-graph-composer-examples-core</module>
     </modules>
 
     <description>

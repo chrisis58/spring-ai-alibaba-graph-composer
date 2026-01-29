@@ -3,12 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.teacy.ai</groupId>
-    <artifactId>saa-graph-composer</artifactId>
+    <artifactId>spring-ai-alibaba-graph-composer</artifactId>
     <version>${revision}</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>saa-graph-composer</name>
+    <name>spring-ai-alibaba-graph-composer</name>
     <url>https://github.com/chrisis58/spring-ai-alibaba-graph-composer</url>
+    <modules>
+        <module>saa-graph-composer</module>
+        <module>saa-graph-composer-spring-boot-starter</module>
+    </modules>
 
     <description>
         Declarative AI Agent Compose Extension for Spring AI Alibaba (SAA) Graph.
@@ -66,34 +70,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-graph-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
 
     <build>
         <plugins>

@@ -56,12 +56,46 @@ jobs:
           MAVEN_CENTRAL_USERNAME: anonymous
           MAVEN_CENTRAL_TOKEN: nopass
 
-
-      - name: Report Result
+      - name: Prepare Result File
         if: always()
         run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "| ✅ Pass | ${{ matrix.boot }} | ${{ matrix.saa }} |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| ❌ Fail | ${{ matrix.boot }} | ${{ matrix.saa }} |" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "${{ job.status }}|${{ matrix.boot }}|${{ matrix.saa }}" > result-${{ matrix.boot }}-${{ matrix.saa }}.txt
+
+      - name: Upload Result Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.boot }}-${{ matrix.saa }}
+          path: result-${{ matrix.boot }}-${{ matrix.saa }}.txt
+          retention-days: 1
+
+  summary:
+    name: Summarize Results
+    needs: [ compatibility-test ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download All Results
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+          pattern: results-*
+          merge-multiple: true
+
+      - name: Generate Final Summary
+        run: |
+          echo "### 📊 Compatibility Matrix Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | Spring Boot | Spring AI Alibaba |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          
+          for file in all-results/result-*.txt; do
+            STATUS=$(cut -d'|' -f1 < "$file")
+            BOOT=$(cut -d'|' -f2 < "$file")
+            SAA=$(cut -d'|' -f3 < "$file")
+          
+            if [ "$STATUS" == "success" ]; then
+              echo "| ✅ Pass | $BOOT | $SAA |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| ❌ Fail | $BOOT | $SAA |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

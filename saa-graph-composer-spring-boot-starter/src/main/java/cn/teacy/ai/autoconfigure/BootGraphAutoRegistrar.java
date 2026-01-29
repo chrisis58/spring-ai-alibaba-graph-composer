@@ -11,6 +11,21 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import java.util.Collection;
 
+/**
+ * Extension of {@link GraphAutoRegistrar} specifically designed for Spring Boot applications.
+ * <p>This registrar enhances the base scanning logic by integrating with
+ * {@link AutoConfigurationPackages}. When no specific base packages are defined, it
+ * automatically falls back to the packages used by the {@code @SpringBootApplication}
+ * or {@code @EnableAutoConfiguration} annotations.
+ * <p>Additionally, this implementation suppresses the default compiler registration
+ * ({@link #registerDefaultCompilerIfNecessary}) to allow the Starter's
+ * Auto-Configuration class to manage the {@code GraphCompiler} Bean with full
+ * conditional support (e.g., {@code @ConditionalOnMissingBean}).
+ *
+ * @since 0.3.0
+ * @see AutoConfigurationPackages
+ * @see GraphAutoRegistrar
+ */
 public class BootGraphAutoRegistrar extends GraphAutoRegistrar implements BeanFactoryAware {
 
     private BeanFactory beanFactory;

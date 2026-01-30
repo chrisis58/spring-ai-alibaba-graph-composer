@@ -23,7 +23,7 @@ SAA (Spring AI Alibaba) Graph Composer 是 Spring AI Alibaba Graph 的声明式�
 
 ## 快速开始
 
-引入依赖，并在启动类上标注 `@EnableGraphComposer`:
+引入 `saa-graph-composer-spring-boot-starter` 依赖：
 
 ```xml
 <dependency>

@@ -68,60 +68,19 @@ protected interface GraphOperation {
 
 **第一步：定义接口**
 
-```java
-public interface GraphModule {
-    /**
-     * 返回一组需要注册的节点
-     * Key: 节点 ID
-     * Value: 节点逻辑
-     */
-    Map<String, NodeAction> namedNodes();
-}
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/extend/interfaces/GraphModule.java">
 
-```
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/extend/interfaces/GraphModule.java#snippet{java}
+
+</ExampleWrapper>
 
 **第二步: 扩展编译器处理逻辑**
 
-```java
-public class MyCustomCompiler extends ReflectiveGraphCompiler {
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/config/GraphComposerConfig.java">
 
-    @Override
-    protected void handleGraphNode(CompileContext context, Field field, GraphNode anno) {
-        // 1. 获取字段值
-        ReflectionUtils.makeAccessible(field);
-        Object instance = ReflectionUtils.getField(field, context.composerInstance());
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/config/GraphComposerConfig.java#extendGraphNode{java}
 
-        // 2. 识别 GraphModule 接口
-        if (instance instanceof GraphModule module) {
-            context.registerOperation(builder -> {
-                Map<String, NodeAction> nodes = module.namedNodes();
-                if (nodes == null || nodes.isEmpty()) {
-                    return;
-                }
-
-                // 3.1 批量注册模块内的所有节点
-                nodes.forEach((nodeId, action) -> {
-                    // 如果 action 类型复杂，可以使用 UnifyUtils 进行转换
-                    builder.addNode(nodeId, AsyncNodeAction.node_async(action));
-                });
-
-                // 3.2 处理模块入口连线
-                if (anno.isStart() && StringUtils.hasText(anno.id())) {
-                    builder.addEdge(StateGraph.START, anno.id());
-                }
-
-            }, "register GraphModule nodes from field '%s'", field.getName());
-
-            // 4. 处理完毕，阻断父类逻辑
-            return;
-        }
-
-        // 5. 非模块类型，务必回退给父类处理标准类型
-        super.handleGraphNode(context, field, anno);
-    }
-}
-
-```
+</ExampleWrapper>
 
 ::: tip 最佳实践
 `context#registerOperation` 方法是向编译上下文注册构建操作的推荐方式。它额外接收一个字符串模板以及参数，用于生成更具描述性的错误信息。
@@ -135,64 +94,21 @@ public class MyCustomCompiler extends ReflectiveGraphCompiler {
 
 **第一步：定义注解**
 
-```java
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GraphEdge {
-    /** 边的起始节点 ID */
-    String source();
-}
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/extend/annotation/GraphEdge.java">
 
-```
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/extend/annotation/GraphEdge.java#snippet{java}
+
+</ExampleWrapper>
 
 **第二步：扩展编译器处理逻辑**
 
 重写 `handleOtherField` 方法来拦截并处理这个注解。
 
-```java
-public class MyFullFeatureCompiler extends ReflectiveGraphCompiler {
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/config/GraphComposerConfig.java">
 
-    @Override
-    protected void handleOtherField(CompileContext context, Field field) {
-        // 1. 检查字段是否包含自定义注解
-        if (field.isAnnotationPresent(GraphEdge.class)) {
-            handleCustomGraphEdge(context, field, field.getAnnotation(GraphEdge.class));
-            return; // 处理完毕，阻断父类逻辑
-        }
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/config/GraphComposerConfig.java#extendOtherField{java}
 
-        // 2. 对于不认识的字段，必须调用父类（父类会记录 Debug 日志）
-        super.handleOtherField(context, field);
-    }
-
-    private void handleCustomGraphEdge(CompileContext context, Field field, GraphEdge anno) {
-        // 1. 校验字段类型 (约定字段值必须是目标节点ID)
-        if (field.getType() != String.class) {
-            throw new IllegalArgumentException(
-                String.format("Field '%s' annotated with @GraphEdge must be of type String.", field.getName()));
-        }
-
-        ReflectionUtils.makeAccessible(field);
-
-        // 2. 获取字段值（即 Target Node ID）
-        Object value = ReflectionUtils.getField(field, context.composerInstance());
-        String targetId = (String) value;
-
-        if (!StringUtils.hasText(targetId)) {
-            throw new IllegalArgumentException(
-                String.format("Field '%s' must provide a valid target node ID.", field.getName()));
-        }
-
-        String sourceId = anno.source();
-
-        // 3. 核心步骤：向 Context 添加操作指令
-        // 这些指令会在 compile() 的最终阶段执行
-        context.registerOperation(builder -> {
-            builder.addEdge(sourceId, targetId);
-        }, "add custom edge from '%s' to '%s' (field: %s)", sourceId, targetId, field.getName());
-    }
-}
-
-```
+</ExampleWrapper>
 
 ::: tip 最佳实践
 `context#registerOperation` 方法是向编译上下文注册构建操作的推荐方式。它额外接收一个字符串模板以及参数，用于生成更具描述性的错误信息。
@@ -204,56 +120,37 @@ public class MyFullFeatureCompiler extends ReflectiveGraphCompiler {
 
 **实现一个简单的模块**
 
-```java
-public class DemoModule implements GraphModule {
-    @Override
-    public Map<String, NodeAction> namedNodes() {
-        return Map.of(
-                "node_a", (state) -> { System.out.println("A"); return Map.of(); },
-                "node_b", (state) -> { System.out.println("B"); return Map.of(); }
-        );
-    }
-}
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/node/DemoModule.java">
 
-```
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/node/DemoModule.java#snippet{java}
+
+</ExampleWrapper>
 
 **在 Composer 中使用**
 
-```java
-@GraphComposer
-public class SimpleComposer {
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/graph/ExtendExampleGraphComposer.java">
 
-    // --- 批量注册 ---
-    // 这将自动注册 "node_a" 和 "node_b"
-    // 指定 id="node_a" 配合 isStart=true，让编译器自动连接 START -> node_a
-    @GraphNode(id = "node_a", isStart = true)
-    public GraphModule myModule = new DemoModule();
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/graph/ExtendExampleGraphComposer.java#snippet{java}
 
-    // --- 标准节点 ---
-    @GraphNode(id = "node_c")
-    public NodeAction nodeC = (state) -> Map.of();
-
-    // --- 自定义注解连线 ---
-
-    // node_a -> node_b (模块内部连线)
-    @GraphEdge(source = "node_a")
-    private final String link1 = "node_b";
-
-    // node_b -> node_c (模块连向外部)
-    @GraphEdge(source = "node_b")
-    private final String link2 = "node_c";
-
-    // node_c -> END
-    @GraphEdge(source = "node_c")
-    private final String link3 = StateGraph.END;
-}
-
-```
+</ExampleWrapper>
 
 ## 5. 覆盖默认的 Graph Compiler
 
 如果你定义了自定义的编译器，必须将其注册为 Spring Bean 以替换框架默认的 `ReflectiveGraphCompiler`。
 
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/config/GraphComposerConfig.java">
+
+<<< @/../examples/saa-graph-composer-examples-extend/src/main/java/cn/teacy/ai/example/agent/config/GraphComposerConfig.java#overrideCompiler{java}
+
+</ExampleWrapper>
+
+::: warning ⚠️ 重要提示：Bean 名称必须匹配
+
+本框架的 AutoConfiguration 通过 Bean 名称 `graphCompiler` 来判断是否需要创建默认编译器。因此，在覆盖默认实现时，**必须**将 Bean 的名称指定为 `graphCompiler`（建议使用常量 `ComposerConfigConstants.GRAPH_COMPILER_BEAN_NAME`）。
+
+**如果 Bean 名称不匹配，框架将无法识别你的自定义编译器，并会继续使用默认实现。**
+
+::: details 示例
 ```java
 @Configuration
 public class MyGraphConfig {
@@ -278,10 +175,14 @@ public class MyGraphConfig {
 }
 
 ```
-
-::: warning ⚠️ 重要提示：Bean 名称必须匹配
-
-本框架的 AutoConfiguration 通过 Bean 名称 `graphCompiler` 来判断是否需要创建默认编译器。因此，在覆盖默认实现时，**必须**将 Bean 的名称指定为 `graphCompiler`（建议使用常量 `ComposerConfigConstants.GRAPH_COMPILER_BEAN_NAME`）。
-
-**如果 Bean 名称不匹配，框架将无法识别你的自定义编译器，并会继续使用默认实现。**
 :::
+
+## 6. 运行示例
+
+你可以在 `saa-graph-composer-examples-extend` 示例项目中找到完整的扩展编译器实现与使用示例。运行该项目的测试类 `ExtendCompilerTest`，即可验证自定义注解和节点类型的功能是否生效。
+
+<ExampleWrapper path="saa-graph-composer-examples-extend/src/test/java/cn/teacy/ai/example/ExtendCompilerTest.java">
+
+<<< @/../examples/saa-graph-composer-examples-extend/src/test/java/cn/teacy/ai/example/ExtendCompilerTest.java#snippet{java}
+
+</ExampleWrapper>

@@ -23,6 +23,9 @@ jobs:
       matrix:
         include:
           - boot: '3.4.1'
+            saa: '1.1.2.0'
+
+          - boot: '3.4.1'
             saa: '1.1.0.0'
 
           - boot: '3.3.6'

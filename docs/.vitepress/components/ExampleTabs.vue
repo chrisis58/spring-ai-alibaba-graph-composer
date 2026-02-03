@@ -8,7 +8,7 @@
             :key="index"
             class="tab-btn"
             :class="{ active: index === activeIndex }"
-            @click="activeIndex = index"
+            @click="selectTab(index)"
         >
           {{ tab.label }}
         </button>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, provide, reactive } from 'vue';
+import { ref, computed, provide, reactive, onMounted, watch, onUnmounted } from 'vue';
 
 interface TabData {
   label: string;
@@ -39,8 +39,64 @@ interface TabData {
   title?: string;
 }
 
+const STORAGE_KEY = 'vitepress-tab-preference';
+const SYNC_EVENT = 'vitepress:tab-sync';
+
 const tabs = reactive<TabData[]>([]);
 const activeIndex = ref(0);
+
+const getStoredLabel = (): string | null => {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem(STORAGE_KEY);
+};
+
+const syncToIndexByLabel = (label: string) => {
+  const targetIndex = tabs.findIndex(t => t.label === label);
+  if (targetIndex !== -1) {
+    activeIndex.value = targetIndex;
+  }
+};
+
+const selectTab = (index: number) => {
+  activeIndex.value = index;
+  const label = tabs[index]?.label;
+
+  if (label && typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, label);
+    window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: label }));
+  }
+};
+
+const handleSyncEvent = (event: Event) => {
+  const customEvent = event as CustomEvent;
+  if (customEvent.detail) {
+    syncToIndexByLabel(customEvent.detail);
+  }
+};
+
+onMounted(() => {
+  const storedLabel = getStoredLabel();
+  if (storedLabel) {
+    syncToIndexByLabel(storedLabel);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener(SYNC_EVENT, handleSyncEvent);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener(SYNC_EVENT, handleSyncEvent);
+  }
+});
+
+watch(() => tabs.length, () => {
+  const storedLabel = getStoredLabel();
+  if (storedLabel) {
+    syncToIndexByLabel(storedLabel);
+  }
+});
 
 const registerTab = (data: TabData) => {
   const index = tabs.length;
@@ -97,7 +153,7 @@ const currentDisplayTitle = computed(() => {
   margin-left: 10px;
   padding: 0 16px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--vp-c-text-2);
   background: transparent;
   border: none;

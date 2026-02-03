@@ -27,9 +27,18 @@ public interface GraphCompiler {
 
 如果你希望完全消除 IDE 关于 "Could not autowire" 的误报，或者希望明确控制 Bean 的依赖关系，可以使用显式配置模式替代 `@EnableGraphComposer`。
 
-### 1. 移除自动配置
+### 1. 移除自动配置并禁用自动编译
 
 首先，确保你的启动类上**没有**标注 `@EnableGraphComposer`。
+
+另外，如果你使用的是 Spring Boot Starter，可以通过添加以下配置来禁用自动编译：
+
+```yaml
+spring:
+  ai:
+    graph-composer:
+      auto-compile: false
+```
 
 ### 2. 定义配置类
 

@@ -112,4 +112,4 @@ implementation 'cn.teacy.ai:saa-graph-composer-spring-boot-starter:0.3.0'
 
 但这只是开始，接下来你可以探索更多功能：
 
-* **[注解详解](../reference/configuration)**: 查阅 `@GraphComposer` 和 `@GraphNode` 等的所有参数。
+- **[图定义](../reference/graph-definition)**: 查阅 `@GraphComposer` 和 `@GraphNode` 等用于定义图的注解。

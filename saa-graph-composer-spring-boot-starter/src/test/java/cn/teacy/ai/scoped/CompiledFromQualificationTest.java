@@ -15,6 +15,7 @@ import java.util.Map;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
         classes = {
                 CompiledFromQualificationTest.TestConfig.class,
                 GreetingGraphComposer.class,

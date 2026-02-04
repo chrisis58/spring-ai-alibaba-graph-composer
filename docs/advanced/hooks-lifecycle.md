@@ -38,30 +38,11 @@ public interface GraphBuildLifecycle {
 
 ### 示例代码
 
-```java
-@GraphComposer
-public class HybridGraphComposer implements GraphBuildLifecycle {
+<ExampleWrapper path="saa-graph-composer-examples-hook/src/main/java/cn/teacy/ai/examples/agent/graph/HybridGraphComposer.java">
 
-    public static final String NODE_A = "nodeA";
+<<< @/../examples/saa-graph-composer-examples-hook/src/main/java/cn/teacy/ai/examples/agent/graph/HybridGraphComposer.java#snippet{java}
 
-    // 1. 使用注解定义节点，但故意省略 next 和 isStart 属性
-    // 框架会自动注册此节点，但暂时不建立任何连接
-    @GraphNode(id = NODE_A) 
-    final AsyncNodeActionWithConfig actionA = (state, config) -> {
-        String input = (String) state.value("input").orElse("");
-        return CompletableFuture.completedFuture(Map.of("result", input + "-processed"));
-    };
-
-    @Override
-    public void beforeCompile(StateGraph builder) throws GraphStateException {
-        // 2. 在钩子中手动补充连线逻辑
-        // 逻辑：Start -> NodeA -> End
-        builder.addEdge(StateGraph.START, NODE_A);
-        builder.addEdge(NODE_A, StateGraph.END);
-    }
-}
-
-```
+</ExampleWrapper>
 
 ::: tip 💡 图构建 API
 关于 `addNode`, `addEdge`, `addConditionalEdge` 等方法的详细参数说明和更多高级用法，请参阅 [Spring AI Alibaba 官方文档](https://java2ai.com/docs/frameworks/graph-core/quick-start)。
@@ -91,20 +72,8 @@ public void beforeCompile(StateGraph builder) {
 
 ```
 
-## 结构校验
+<ExampleWrapper path="saa-graph-composer-examples-hook/src/main/java/cn/teacy/ai/examples/agent/graph/ConditionalAuditGraphComposer.java">
 
-在编译前进行防御性检查，防止错误的图定义上线。这在多人协作或大型复杂图谱中非常有用。
+<<< @/../examples/saa-graph-composer-examples-hook/src/main/java/cn/teacy/ai/examples/agent/graph/ConditionalAuditGraphComposer.java#snippet{java}
 
-### 示例：强制检查安全节点
-
-```java
-@Override
-public void beforeCompile(StateGraph builder) {
-    // 检查图中是否包含必须的 "security_check" 节点
-    // 假设 StateGraph 提供了 hasNode 方法
-    if (!builder.hasNode("security_check")) {
-        throw new GraphStateException("安全合规错误：业务流程必须包含 security_check 节点");
-    }
-}
-
-```
+</ExampleWrapper>

@@ -7,10 +7,10 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>saa-graph-composer-examples-core</artifactId>
+    <artifactId>saa-graph-composer-examples-hook</artifactId>
     <packaging>jar</packaging>
 
-    <name>saa-graph-composer-examples-core</name>
+    <name>saa-graph-composer-examples-hook</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,18 +18,19 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
             <groupId>cn.teacy.ai</groupId>
-            <artifactId>saa-graph-composer</artifactId>
+            <artifactId>saa-graph-composer-spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-graph-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
+
     </dependencies>
 </project>

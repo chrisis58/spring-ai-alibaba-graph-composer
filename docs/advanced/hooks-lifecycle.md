@@ -54,24 +54,6 @@ public interface GraphBuildLifecycle {
 
 ### 示例：根据配置开启审计节点
 
-```java
-@Value("${app.audit.enabled:false}")
-private boolean auditEnabled;
-
-@Override
-public void beforeCompile(StateGraph builder) {
-    if (this.auditEnabled) {
-        // 动态插入审计逻辑： Start -> Process -> Audit -> End
-        builder.addEdge("process", "audit");
-        builder.addEdge("audit", StateGraph.END);
-    } else {
-        // 跳过审计： Start -> Process -> End
-        builder.addEdge("process", StateGraph.END);
-    }
-}
-
-```
-
 <ExampleWrapper path="saa-graph-composer-examples-hook/src/main/java/cn/teacy/ai/examples/agent/graph/ConditionalAuditGraphComposer.java">
 
 <<< @/../examples/saa-graph-composer-examples-hook/src/main/java/cn/teacy/ai/examples/agent/graph/ConditionalAuditGraphComposer.java#snippet{java}

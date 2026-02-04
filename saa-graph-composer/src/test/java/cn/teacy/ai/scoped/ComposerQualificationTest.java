@@ -5,11 +5,9 @@ import cn.teacy.ai.annotation.EnableGraphComposer;
 import cn.teacy.ai.annotation.GraphComposer;
 import cn.teacy.ai.core.GraphCompiler;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,25 +83,25 @@ public class ComposerQualificationTest {
         BeanDefinition alphaDef = context.getBeanDefinition("alphaGraph");
 
         assertThat(alphaDef).isInstanceOf(AbstractBeanDefinition.class);
-
-        AbstractBeanDefinition alphaAbd = (AbstractBeanDefinition) alphaDef;
-        assertThat(alphaAbd.getQualifiers())
-                .asInstanceOf(InstanceOfAssertFactories.set(AutowireCandidateQualifier.class))
+        boolean anyMatch = ((AbstractBeanDefinition) alphaDef).getQualifiers().stream()
                 .anyMatch(q ->
-                        CompiledFrom.class.getName().equals(q.getTypeName()) &&
-                                AlphaGraphComposer.class.equals(q.getAttribute("value")));
+                    CompiledFrom.class.getName().equals(q.getTypeName()) &&
+                            AlphaGraphComposer.class.equals(q.getAttribute("value")));
+        assertThat(anyMatch)
+                .withFailMessage("Expected bean 'alphaGraph' to have qualifier @CompiledFrom(AlphaGraphComposer.class)")
+                .isTrue();
 
 
         BeanDefinition betaDef = context.getBeanDefinition("betaGraph");
         assertThat(betaDef).isInstanceOf(AbstractBeanDefinition.class);
 
-        AbstractBeanDefinition betaAbd = (AbstractBeanDefinition) betaDef;
-        assertThat(betaAbd.getQualifiers())
-                .asInstanceOf(InstanceOfAssertFactories.set(AutowireCandidateQualifier.class))
+        anyMatch = ((AbstractBeanDefinition) betaDef).getQualifiers().stream()
                 .anyMatch(q ->
-                        CompiledFrom.class.getName().equals(q.getTypeName()) &&
-                                BetaGraphComposer.class.equals(q.getAttribute("value")));
-
+                    CompiledFrom.class.getName().equals(q.getTypeName()) &&
+                            BetaGraphComposer.class.equals(q.getAttribute("value")));
+        assertThat(anyMatch)
+                .withFailMessage("Expected bean 'betaGraph' to have qualifier @CompiledFrom(BetaGraphComposer.class)")
+                .isTrue();
     }
 
 

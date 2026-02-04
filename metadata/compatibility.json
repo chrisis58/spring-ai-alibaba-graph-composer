@@ -1,7 +1,7 @@
 [
-  { "status": "success", "boot": "3.2.5", "saa": "1.1.0.0" }
+  { "status": "failure", "boot": "3.2.5", "saa": "1.1.0.0" }
 ,
-  { "status": "success", "boot": "3.3.6", "saa": "1.1.0.0" }
+  { "status": "failure", "boot": "3.3.6", "saa": "1.1.0.0" }
 ,
   { "status": "success", "boot": "3.4.1", "saa": "1.1.0.0-M4" }
 ,

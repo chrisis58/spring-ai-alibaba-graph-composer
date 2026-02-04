@@ -1,14 +1,15 @@
 package cn.teacy.ai.core;
 
+import cn.teacy.ai.annotation.CompiledFrom;
 import cn.teacy.ai.annotation.EnableGraphComposer;
 import cn.teacy.ai.annotation.GraphComposer;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import jakarta.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.*;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -25,6 +26,8 @@ import java.util.*;
 import static cn.teacy.ai.constants.ComposerConfigConstants.GRAPH_COMPILER_BEAN_NAME;
 
 public class GraphAutoRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoaderAware {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphAutoRegistrar.class);
 
     private final BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
@@ -124,7 +127,29 @@ public class GraphAutoRegistrar implements ImportBeanDefinitionRegistrar, Resour
 
         builder.addConstructorArgReference(composerBeanName);
 
+        addCompiledFromQualifier(builder.getBeanDefinition(), composerBeanDefinition.getBeanClassName());
+
         registry.registerBeanDefinition(targetBeanName, builder.getBeanDefinition());
+    }
+
+    protected void addCompiledFromQualifier(AbstractBeanDefinition graphBeanDefinition, String composerClassName) {
+        if (!StringUtils.hasText(composerClassName)) {
+            return;
+        }
+
+        try {
+            ClassLoader classLoader = this.resourceLoader != null
+                    ? this.resourceLoader.getClassLoader()
+                    : ClassUtils.getDefaultClassLoader();
+            Class<?> composerClass = ClassUtils.forName(composerClassName, classLoader);
+
+            AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(CompiledFrom.class, composerClass);
+
+            graphBeanDefinition.addQualifier(qualifier);
+
+        } catch (ClassNotFoundException e) {
+            log.warn("Failed to load composer class '{}' for @CompiledFrom qualifier. Injection by @CompiledFrom will not work for this bean.", composerClassName, e);
+        }
     }
 
 }

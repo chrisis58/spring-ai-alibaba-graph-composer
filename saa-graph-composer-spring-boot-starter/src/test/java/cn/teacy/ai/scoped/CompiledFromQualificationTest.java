@@ -14,7 +14,14 @@ import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest(properties = "spring.ai.graph-composer.base-packages=cn.teacy.ai.scoped")
+@SpringBootTest(
+        classes = {
+                CompiledFromQualificationTest.TestConfig.class,
+                GreetingGraphComposer.class,
+                OtherGraphComposer.class
+        },
+        properties = "spring.ai.graph-composer.base-packages=cn.teacy.ai.scoped"
+)
 public class CompiledFromQualificationTest {
 
     @Autowired

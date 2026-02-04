@@ -7,9 +7,16 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Extension of {@link GraphAutoRegistrar} specifically designed for Spring Boot applications.
@@ -26,13 +33,19 @@ import java.util.Collection;
  * @see AutoConfigurationPackages
  * @see GraphAutoRegistrar
  */
-public class BootGraphAutoRegistrar extends GraphAutoRegistrar implements BeanFactoryAware {
+public class BootGraphAutoRegistrar extends GraphAutoRegistrar implements BeanFactoryAware, EnvironmentAware {
 
     private BeanFactory beanFactory;
+    private Environment environment;
 
     @Override
     public void setBeanFactory(@Nonnull BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
+    }
+
+    @Override
+    public void setEnvironment(@Nonnull Environment environment) {
+        this.environment = environment;
     }
 
     @Override
@@ -42,6 +55,16 @@ public class BootGraphAutoRegistrar extends GraphAutoRegistrar implements BeanFa
 
     @Override
     protected Collection<String> resolveEmptyBasePackage(AnnotationMetadata importingClassMetadata) {
+        if (this.environment != null) {
+            List<String> configPackages = Binder.get(this.environment)
+                    .bind("spring.ai.graph-composer.base-packages", Bindable.listOf(String.class))
+                    .orElse(Collections.emptyList());
+
+            if (!CollectionUtils.isEmpty(configPackages)) {
+                return configPackages;
+            }
+        }
+
         if (this.beanFactory != null && AutoConfigurationPackages.has(this.beanFactory)) {
             return AutoConfigurationPackages.get(this.beanFactory);
         }

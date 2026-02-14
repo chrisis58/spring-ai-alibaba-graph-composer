@@ -17,6 +17,8 @@ public class GreetingGraphDemoTest {
     // region beanRef
     @Autowired
     @Qualifier("greetingGraphWithBeanNode")
+    // 0.3.1+
+    // @CompiledFrom(GreetingGraphWithBeanNodeComposer.class)
     private CompiledGraph greetingGraphWithBeanNode;
 
     @Test
@@ -38,6 +40,8 @@ public class GreetingGraphDemoTest {
     // region adaptor
     @Autowired
     @Qualifier("greetingGraphWithAdaptorNode")
+    // 0.3.1+
+    // @CompiledFrom(GreetingGraphWithAdaptorNodeComposer.class)
     private CompiledGraph greetingGraphWithAdaptorNode;
 
     @Test

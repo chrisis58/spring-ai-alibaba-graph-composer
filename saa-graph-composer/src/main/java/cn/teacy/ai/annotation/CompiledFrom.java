@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  * @see com.alibaba.cloud.ai.graph.CompiledGraph
  * @since 0.3.1
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Qualifier

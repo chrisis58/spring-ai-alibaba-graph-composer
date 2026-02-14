@@ -8,8 +8,8 @@ import cn.teacy.ai.tests.scoped.TestGraphConfig;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,8 +23,8 @@ public class GraphAutoRegistrarTest {
     public static class GraphCompilerConfiguration {
 
         @Bean
-        public GraphCompiler graphCompiler(ApplicationContext applicationContext) {
-            return new SpringReflectiveGraphCompiler(applicationContext);
+        public GraphCompiler graphCompiler(ConfigurableListableBeanFactory beanFactory) {
+            return new SpringReflectiveGraphCompiler(beanFactory);
         }
 
     }

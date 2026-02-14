@@ -1,15 +1,17 @@
 package cn.teacy.ai.core;
 
 import jakarta.annotation.Nonnull;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A GraphCompiler that integrates with Spring's ApplicationContext to resolve dependencies.
@@ -18,12 +20,12 @@ import java.lang.reflect.Field;
  */
 public class SpringReflectiveGraphCompiler extends ReflectiveGraphCompiler {
 
-    private static final Log log = LogFactory.getLog(SpringReflectiveGraphCompiler.class);
+    private static final Logger log = LoggerFactory.getLogger(SpringReflectiveGraphCompiler.class);
 
-    private final ApplicationContext applicationContext;
+    private final ConfigurableListableBeanFactory beanFactory;
 
-    public SpringReflectiveGraphCompiler(@Nonnull ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public SpringReflectiveGraphCompiler(@Nonnull ConfigurableListableBeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
 
     /**
@@ -37,29 +39,31 @@ public class SpringReflectiveGraphCompiler extends ReflectiveGraphCompiler {
     @Override
     protected Object resolveMissingField(Field field, String candidateName) {
         Class<?> type = field.getType();
+        String fieldName = field.getName();
 
-        if (StringUtils.hasText(candidateName) &&
-                applicationContext.containsBean(candidateName) &&
-                applicationContext.isTypeMatch(candidateName, type)) {
-            return applicationContext.getBean(candidateName, type);
+        if (StringUtils.hasText(candidateName)
+                && beanFactory.containsBean(candidateName) && beanFactory.isTypeMatch(candidateName, type)) {
+            return beanFactory.getBean(candidateName, type);
         }
 
-        String fieldName = field.getName();
-        if (!fieldName.equals(candidateName) &&
-                applicationContext.containsBean(fieldName) &&
-                applicationContext.isTypeMatch(fieldName, type)) {
-            return applicationContext.getBean(fieldName, type);
+        if (beanFactory.containsBean(fieldName) && beanFactory.isTypeMatch(fieldName, type)) {
+            return beanFactory.getBean(fieldName, type);
         }
 
         try {
-            return applicationContext.getBean(type);
-        } catch (NoUniqueBeanDefinitionException e) {
-            log.error("Multiple beans of type " + type.getName() +
-                    " found in ApplicationContext. ", e);
-            return null;
-        } catch (NoSuchBeanDefinitionException e) {
-            log.error("No bean of type " + type.getName() +
-                    " found in ApplicationContext.", e);
+            DependencyDescriptor descriptor = new DependencyDescriptor(field, false);
+            Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
+
+            Object result = beanFactory.resolveDependency(descriptor, candidateName, autowiredBeanNames, null);
+
+            if (result == null) {
+                log.warn("No bean found for field {} of type {}", field.getName(), field.getType().getName());
+            }
+
+            return result;
+
+        } catch (BeansException e) {
+            log.warn("Failed to resolve dependency for field {}", field.getName(), e);
             return null;
         }
     }

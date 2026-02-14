@@ -3,11 +3,11 @@ package cn.teacy.ai.autoconfigure;
 import cn.teacy.ai.core.GraphCompiler;
 import cn.teacy.ai.core.SpringReflectiveGraphCompiler;
 import cn.teacy.ai.support.GraphComposerMarker;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -22,8 +22,8 @@ public class SaaGraphComposerAutoConfiguration {
 
     @Bean(GRAPH_COMPILER_BEAN_NAME)
     @ConditionalOnMissingBean(name = GRAPH_COMPILER_BEAN_NAME)
-    public GraphCompiler graphCompiler(ApplicationContext applicationContext) {
-        return new SpringReflectiveGraphCompiler(applicationContext);
+    public GraphCompiler graphCompiler(ConfigurableListableBeanFactory beanFactory) {
+        return new SpringReflectiveGraphCompiler(beanFactory);
     }
 
     @Configuration(proxyBeanMethods = false)

@@ -29,13 +29,13 @@
 <dependency>
     <groupId>cn.teacy.ai</groupId>
     <artifactId>saa-graph-composer-spring-boot-starter</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
 </dependency>
 
 ```
 
 ```groovy [Gradle]
-implementation 'cn.teacy.ai:saa-graph-composer-spring-boot-starter:0.3.0'
+implementation 'cn.teacy.ai:saa-graph-composer-spring-boot-starter:0.3.1'
 
 ```
 

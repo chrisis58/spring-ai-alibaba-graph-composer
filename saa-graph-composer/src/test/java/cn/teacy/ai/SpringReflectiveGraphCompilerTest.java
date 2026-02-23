@@ -1,12 +1,10 @@
 package cn.teacy.ai;
 
-import cn.teacy.ai.annotation.ConditionalEdge;
-import cn.teacy.ai.annotation.GraphComposer;
-import cn.teacy.ai.annotation.GraphKey;
-import cn.teacy.ai.annotation.GraphNode;
+import cn.teacy.ai.annotation.*;
 import cn.teacy.ai.core.GraphCompiler;
 import cn.teacy.ai.core.SpringReflectiveGraphCompiler;
 import cn.teacy.ai.exception.GraphDefinitionException;
+import com.alibaba.cloud.ai.graph.CompiledGraph;
 import com.alibaba.cloud.ai.graph.StateGraph;
 import com.alibaba.cloud.ai.graph.action.AsyncNodeAction;
 import com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig;
@@ -18,6 +16,8 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
@@ -180,10 +180,6 @@ public class SpringReflectiveGraphCompilerTest {
                             });
 
                     Assertions.assertThat(output.getOut())
-                            .contains("Multiple beans of type")
-                            .contains("found in ApplicationContext");
-
-                    Assertions.assertThat(output.getOut())
                             .contains("NoUniqueBeanDefinitionException");
                 });
     }
@@ -212,12 +208,9 @@ public class SpringReflectiveGraphCompilerTest {
                                         .hasMessageContaining("is null");
                             });
 
-                    Assertions.assertThat(output.getOut())
-                            .contains("No bean of type")
-                            .contains("found in ApplicationContext");
 
                     Assertions.assertThat(output.getOut())
-                            .contains("NoSuchBeanDefinitionException");
+                            .contains("No bean found for field");
                 });
     }
 
@@ -291,6 +284,43 @@ public class SpringReflectiveGraphCompilerTest {
 
     }
 
+    @Test
+    @DisplayName("Spring bean injection should work for nested GraphComposer")
+    void testSpringBeanInjectionInNestedGraphComposer() {
+        runner.withUserConfiguration(TestConfiguration.class)
+                .run(context -> {
+                    GraphCompiler compiler = context.getBean(GraphCompiler.class);
+                    NestedGraphComposer composer = new NestedGraphComposer();
+                    var compiledGraph = compiler.compile(composer);
+
+                    var state = compiledGraph.invoke(Map.of()).orElseThrow();
+                    Optional<Object> output = state.value(OUTPUT);
+                    Assertions.assertThat(output).isPresent();
+
+                    /// here the expected size is 12
+                    /// @see https://github.com/alibaba/spring-ai-alibaba/issues/4305
+                    Assertions.assertThat(output.get())
+                            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                            .hasSize(12);
+                });
+    }
+
+    @GraphComposer
+    static class NestedGraphComposer {
+
+        @GraphKey(strategy = AppendStrategy.class)
+        public static final String KEY_OUTPUT = OUTPUT;
+
+        @GraphNode(id = "subNodeA", isStart = true, next = "subNodeB")
+        @CompiledFrom(IndexedByNodeIdSpringContextGraphComposer.class)
+        CompiledGraph subNodeA;
+
+        @GraphNode(id = "subNodeB", next = StateGraph.END)
+        @Qualifier("indexedByFieldNameSpringContextGraph")
+        CompiledGraph subNodeB;
+
+    }
+
     @Configuration
     public static class TestConfiguration {
 
@@ -326,8 +356,20 @@ public class SpringReflectiveGraphCompilerTest {
         }
 
         @Bean
-        public GraphCompiler graphCompiler(ApplicationContext applicationContext) {
-            return new SpringReflectiveGraphCompiler(applicationContext);
+        public GraphCompiler graphCompiler(ConfigurableListableBeanFactory beanFactory) {
+            return new SpringReflectiveGraphCompiler(beanFactory);
+        }
+
+        @Bean
+        @CompiledFrom(IndexedByNodeIdSpringContextGraphComposer.class)
+        public CompiledGraph indexedByNodeIdSpringContextGraph(GraphCompiler graphCompiler) {
+            return graphCompiler.compile(new IndexedByNodeIdSpringContextGraphComposer());
+        }
+
+        @Bean
+        @Qualifier("indexedByFieldNameSpringContextGraph")
+        public CompiledGraph indexedByFieldNameSpringContextGraph(GraphCompiler graphCompiler) {
+            return graphCompiler.compile(new IndexedByFieldNameSpringContextGraphComposer());
         }
 
     }

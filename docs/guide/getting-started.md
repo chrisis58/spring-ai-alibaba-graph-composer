@@ -13,7 +13,7 @@
 
 * **JDK**: 17 或更高版本
 * **Spring Boot**: 3.x
-* **Spring AI Alibaba**: 1.1.0.0
+* **Spring AI Alibaba**: 1.1.2.0
 
 ::: warning ⚠️ 不支持的版本
 - Spring AI Alibaba: 1.0.0.x

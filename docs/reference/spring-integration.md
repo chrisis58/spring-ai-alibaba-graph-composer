@@ -44,6 +44,7 @@ public class OrderWorkflow {
     
     // 依然支持内联定义的简单节点
     @GraphNode(id = "payment", isStart = false)
+    @Qualifier("paymentNode") // 可以使用 @Qualifier 指定候选
     final AsyncNodeAction payment = state -> {
         System.out.println("Processing payment...");
         return CompletableFuture.completedFuture(Collections.emptyMap());
@@ -63,10 +64,10 @@ public class OrderWorkflow {
    * **条件**：字段名与候选名称不同（或者没有候选名称）。
    * **逻辑**：检查容器中是否存在与 **Java 字段名** 同名的 Bean，且该 Bean 的类型与字段类型兼容。
 
-3. **第三级：类型匹配**
+3. **第三级：Spring 标准依赖解析**
 
-   * **条件**：前两级均未命中。
-   * **逻辑**：尝试在容器中查找该 **字段类型** 的 Bean。
+   * **条件**：前两级基于名称的直接匹配均未能找到合适的 Bean。
+   * **逻辑**：将当前字段封装为 `DependencyDescriptor`，调用 Spring 的 `resolveDependency` 机制进行依赖解析。支持包括但不限于按类型匹配、@Primary 优先级判定、@Qualifier 限定符解析以及泛型/集合类型的注入。
 
 ::: tip 关于 `candidateName`
 目前只有 `@GraphNode` 注解的 `id` 属性会被用作 `candidateName`。

@@ -13,7 +13,7 @@
 
 * **JDK**: 17 或更高版本
 * **Spring Boot**: 3.x
-* **Spring AI Alibaba**: 1.1.0.0
+* **Spring AI Alibaba**: 1.1.2.0
 
 ::: warning ⚠️ 不支持的版本
 - Spring AI Alibaba: 1.0.0.x
@@ -29,13 +29,13 @@
 <dependency>
     <groupId>cn.teacy.ai</groupId>
     <artifactId>saa-graph-composer-spring-boot-starter</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
 </dependency>
 
 ```
 
 ```groovy [Gradle]
-implementation 'cn.teacy.ai:saa-graph-composer-spring-boot-starter:0.3.1'
+implementation 'cn.teacy.ai:saa-graph-composer-spring-boot-starter:0.3.2'
 
 ```
 
